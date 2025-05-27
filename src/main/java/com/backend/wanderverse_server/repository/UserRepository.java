@@ -3,10 +3,12 @@ package com.backend.wanderverse_server.repository;
 import com.backend.wanderverse_server.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    UserEntity findUserByUsername(String username);
+import java.util.Optional;
 
-    UserEntity findUserByEmail(String email);
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    Optional<UserEntity> findUserByUsername(String username);
+
+    Optional<UserEntity> findUserByEmail(String email);
 
     boolean existsByUsername(String username);
 
