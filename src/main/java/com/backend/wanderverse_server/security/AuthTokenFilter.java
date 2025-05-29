@@ -5,7 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Log
 public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
@@ -36,7 +34,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             if (jwt != null && jwtUtil.validateJwtToken(jwt)) {
                 // Currently using email to sign in
                 String email = jwtUtil.getEmailFromToken(jwt);
-                logger.info(email);
                 UserDetails userDetails = authService.loadUserByEmail(email);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(

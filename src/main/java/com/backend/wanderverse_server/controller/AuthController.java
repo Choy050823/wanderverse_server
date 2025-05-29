@@ -3,9 +3,6 @@ package com.backend.wanderverse_server.controller;
 import com.backend.wanderverse_server.model.dto.AuthResponseDTO;
 import com.backend.wanderverse_server.model.dto.LoginRequestDTO;
 import com.backend.wanderverse_server.model.dto.SignUpRequestDTO;
-import com.backend.wanderverse_server.model.dto.UserDTO;
-import com.backend.wanderverse_server.model.entity.UserEntity;
-import com.backend.wanderverse_server.model.mappers.Mapper;
 import com.backend.wanderverse_server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @Autowired
-    private Mapper<UserEntity, UserDTO> userMapper;
-
-    @Autowired
     private AuthService authService;
 
     @PostMapping("/login")
@@ -30,13 +24,12 @@ public class AuthController {
         return authService.authenticate(loginRequest)
                 .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
-
     }
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
         return authService.register(signUpRequest)
-            .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
+            .map(response -> new ResponseEntity<>(response, HttpStatus.CREATED))
             .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
     }
 }

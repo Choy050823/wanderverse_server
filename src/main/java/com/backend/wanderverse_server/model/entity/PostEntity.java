@@ -7,30 +7,29 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "posts")
+public class PostEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
-
-    @Column(unique = true, nullable = false)
-    private String email;
+    @Column(nullable = false)
+    private String title;
 
     @Column(nullable = false)
-    private String password;
+    private String content;
 
-    private String description;
-    private String profilePicUrl;
-    private int gamePoints;
+    @ElementCollection
+    @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
+    private List<String> imageUrls;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -48,5 +47,19 @@ public class UserEntity {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @Column(nullable = false)
+    private int likesCount;
+
+    @Column(nullable = false)
+    private int commentsCount;
+
+    @ManyToOne
+    @JoinColumn(name = "creatorId")
+    private UserEntity creator;
+
+    @ManyToOne
+    @JoinColumn(name = "destinationId")
+    private DestinationEntity destination;
 
 }

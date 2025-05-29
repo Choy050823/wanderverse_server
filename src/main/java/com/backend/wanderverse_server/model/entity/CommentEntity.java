@@ -9,44 +9,33 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "comments")
+public class CommentEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
-
-    @Column(unique = true, nullable = false)
-    private String email;
-
     @Column(nullable = false)
-    private String password;
+    private String content;
 
-    private String description;
-    private String profilePicUrl;
-    private int gamePoints;
+    @ManyToOne
+    @JoinColumn(name = "postId")
+    private PostEntity post;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private UserEntity user;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
 }

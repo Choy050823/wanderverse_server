@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.service;
+package com.backend.wanderverse_server.service.impl;
 
 import com.backend.wanderverse_server.model.dto.AuthResponseDTO;
 import com.backend.wanderverse_server.model.dto.LoginRequestDTO;
@@ -8,7 +8,8 @@ import com.backend.wanderverse_server.model.entity.UserEntity;
 import com.backend.wanderverse_server.model.mappers.Mapper;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.security.JwtUtil;
-import lombok.extern.java.Log;
+import com.backend.wanderverse_server.service.AuthService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
-@Log
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     @Autowired
     @Lazy
@@ -82,11 +83,11 @@ public class AuthServiceImpl implements AuthService {
             // Return user with token
             return userRepository.findUserByEmail(loginRequest.getEmail())
                     .map(userEntity -> AuthResponseDTO.builder()
-                        .userDTO(userMapper.mapTo(userEntity))
+                        .user(userMapper.mapTo(userEntity))
                         .token(token)
                         .build());
         } catch (Exception e) {
-            System.out.println("Authentication failed: " + e.getMessage());
+            log.error("Authentication failed: {}", e.getMessage());
             return Optional.empty();
         }
     }
@@ -94,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Optional<AuthResponseDTO> register(SignUpRequestDTO signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            System.out.println("User exists");
+            log.error("User exists");
             return Optional.empty();
         }
 
@@ -114,13 +115,13 @@ public class AuthServiceImpl implements AuthService {
 
             String token = jwtUtil.generateToken(signUpRequest.getEmail());
 
-            System.out.println("successfully added user");
+            log.info("successfully added user");
             return Optional.of(AuthResponseDTO.builder()
-                    .userDTO(userMapper.mapTo(savedUserEntity))
+                    .user(userMapper.mapTo(savedUserEntity))
                     .token(token)
                     .build());
         } catch (Exception e) {
-            System.out.println("Sign Up Failed: " + e.getMessage());
+            log.error("Sign Up Failed: {}", e.getMessage());
             return Optional.empty();
         }
     }
