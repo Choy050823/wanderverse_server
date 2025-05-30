@@ -29,7 +29,7 @@ public class PostController {
     @PostMapping(path = "/create")
     public ResponseEntity<PostDTO> createPost(@RequestBody CreatePostRequestDTO post) {
 //        boolean isExists = postService.isExists(Long.parseLong(post.getId()));
-        PostDTO savedPost = postMapper.mapTo(postService.createBook(post));
+        PostDTO savedPost = postMapper.mapTo(postService.createPost(post));
 
         return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
     }

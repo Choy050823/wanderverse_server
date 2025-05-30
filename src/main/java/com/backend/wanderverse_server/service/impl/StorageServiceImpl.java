@@ -63,7 +63,7 @@ public class StorageServiceImpl implements StorageService {
                             .key(fileName)
                             .contentType(multipartFile.getContentType())
                             .metadata(metaData)
-                            .acl("public-read")     // should set to predesigned url later in production
+//                            .acl("public-read")     // should set to predesigned url later in production
                             .build();
 
             PutObjectResponse response = s3Client.putObject(
@@ -105,7 +105,7 @@ public class StorageServiceImpl implements StorageService {
     private String generateFileUrl(String fileName) {
         if (!endpoint.isEmpty()) {
             // MinIO URL
-            return String.format("%s_%s_%s", endpoint, bucketName, fileName);
+            return String.format("%s/%s/%s", endpoint, bucketName, fileName);
         } else {
             // S3 URL
             return String.format("https://%s.s3.amazonaws.com/%s", bucketName, fileName);

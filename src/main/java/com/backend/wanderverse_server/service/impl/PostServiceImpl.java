@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostEntity createBook(CreatePostRequestDTO post) {
+    public PostEntity createPost(CreatePostRequestDTO post) {
         PostEntity postEntity = PostEntity.builder()
                 .title(post.getTitle())
                 .content(post.getContent())
