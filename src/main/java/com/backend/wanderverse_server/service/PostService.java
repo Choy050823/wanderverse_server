@@ -10,7 +10,7 @@ public interface PostService {
 
     PostEntity createPost(CreatePostRequestDTO post);
 
-    PostEntity fullUpdateBook(PostEntity post);
+    PostEntity fullUpdatePost(PostEntity post);
 
     boolean isExists(long id);
 }
