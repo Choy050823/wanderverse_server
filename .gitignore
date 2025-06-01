@@ -5,7 +5,6 @@ target/
 !**/src/test/**/target/
 **/main/resources/*.properties
 compose.yaml
-wanderverse-server.tar
 
 ### STS ###
 .apt_generated
