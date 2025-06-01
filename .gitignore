@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 **/main/resources/*.properties
 compose.yaml
+*.tar
 
 ### STS ###
 .apt_generated
