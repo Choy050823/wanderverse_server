@@ -49,7 +49,7 @@ public class WebSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:*", "https://wanderverse-travel.netlify.app/"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:*", "https://wanderverse-travel.netlify.app", "https://wanderverse-server.onrender.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
