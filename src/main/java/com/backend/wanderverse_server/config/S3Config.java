@@ -15,41 +15,40 @@ import java.net.URI;
 @Configuration
 public class S3Config {
 
-    @Value("${aws.accessKeyId}")
-    private String accessKeyId;
+    @Value("${AWS_ACCESS_KEY_ID:${aws.accessKeyId:}}")
+    private String accessKey;
 
-    @Value("${aws.secretKey}")
+    @Value("${AWS_SECRET_ACCESS_KEY:${aws.secretKey:}}")
     private String secretKey;
 
-    @Value("${aws.region}")
+    @Value("${AWS_REGION:${aws.region:}}")
     private String region;
 
-    @Value("${aws.s3.endpoint}")
+    @Value("${AWS_S3_ENDPOINT:${aws.s3.endpoint:}}")
     private String endpoint;
 
-    @Value("${aws.s3.bucket}")
+    @Value("${AWS_S3_BUCKET:${aws.s3.bucket:}}")
     private String bucket;
 
     @Bean
     public S3Client s3Client() {
-        // Create credentials
-        AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(accessKeyId, secretKey);
+        if (accessKey.isEmpty() || secretKey.isEmpty() || region.isEmpty()) {
+            throw new IllegalStateException("AWS credentials and region must be provided");
+        }
 
-        return S3Client.builder()
-                .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials))
+        S3ClientBuilder builder = S3Client.builder()
                 .region(Region.of(region))
-                .httpClientBuilder(ApacheHttpClient.builder())
-                .applyMutation(builder -> {
-                    if (!endpoint.isEmpty()) {
-                        S3Configuration s3Configuration = S3Configuration.builder()
-                                .pathStyleAccessEnabled(true)
-                                .build();
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)));
 
-                        builder.serviceConfiguration(s3Configuration)
-                                .endpointOverride(URI.create(endpoint));
-                    }
-                })
-                .build();
+        if (endpoint != null && !endpoint.isEmpty()) {
+            builder.endpointOverride(URI.create(endpoint))
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build());
+        }
+
+        return builder.build();
     }
 
     @Bean
