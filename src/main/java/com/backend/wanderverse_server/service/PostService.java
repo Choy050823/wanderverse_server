@@ -8,6 +8,10 @@ import org.springframework.data.domain.Pageable;
 public interface PostService {
     Page<PostEntity> findAll(Pageable pageable);
 
+    Page<PostEntity> findAllSharingPosts(Pageable pageable);
+
+    Page<PostEntity> findAllDiscussionPosts(Pageable pageable);
+
     PostEntity createPost(CreatePostRequestDTO post);
 
     PostEntity fullUpdatePost(PostEntity post);

@@ -40,25 +40,15 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public String saveFile(MultipartFile multipartFile) throws IOException {
         try {
-            // convert into multipart file(image) and add into the bucket
+            // convert into multipart file(image data) and add into the bucket
 //            File file = convertMultiPartFile(multipartFile);
             String fileName = multipartFile.getOriginalFilename();
             Map<String, String> metaData = new HashMap<>();
             metaData.put("Content-Type", multipartFile.getContentType());
 
             // set all added files as public (direct access to image in S3)
-            // change to secured temp access with this code later:
-//            amazonS3.generatePresignedUrl(new GeneratePresignedUrlRequest(bucketName, fileName)
-//                    .withMethod(HttpMethod.GET)
-//                    .withExpiration(new Date(System.currentTimeMillis() + 3600 * 1000))); // 1-hour expiration
-
-//            amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file)
-//                    .withCannedAcl(CannedAccessControlList.PublicRead));
-//
-//            file.delete();
-
-            software.amazon.awssdk.services.s3.model.PutObjectRequest putObjectRequest =
-                    software.amazon.awssdk.services.s3.model.PutObjectRequest.builder()
+            // change to secured temp access with this code later: (predesigned url)
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(fileName)
                             .contentType(multipartFile.getContentType())
@@ -80,9 +70,6 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public byte[] getFile(String filename) throws IOException {
         try {
-//            S3Object s3Object = amazonS3.getObject(bucketName, filename);
-//            return s3Object.getObjectContent().readAllBytes();
-
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(filename)
@@ -93,14 +80,6 @@ public class StorageServiceImpl implements StorageService {
             throw new IOException("Error downloading file: " + e.getMessage(), e);
         }
     }
-
-//    private File convertMultiPartFile(MultipartFile file) throws IOException {
-//        File convFile = new File(System.getProperty("java.io.tmpdir") + "/" + file.getOriginalFilename());
-//        try (FileOutputStream fos = new FileOutputStream(convFile)) {
-//            fos.write(file.getBytes());
-//        }
-//        return convFile;
-//    }
 
     private String generateFileUrl(String fileName) {
         if (!endpoint.isEmpty()) {

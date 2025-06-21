@@ -31,6 +31,10 @@ public class CommentEntity {
     @JoinColumn(name = "userId")
     private UserEntity user;
 
+    @ManyToOne
+    @JoinColumn(name = "parentCommentId")
+    private CommentEntity parentComment;
+
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 

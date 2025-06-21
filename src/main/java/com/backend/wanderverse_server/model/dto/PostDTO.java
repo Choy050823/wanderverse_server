@@ -1,6 +1,7 @@
 package com.backend.wanderverse_server.model.dto;
 
 import com.backend.wanderverse_server.model.entity.DestinationEntity;
+import com.backend.wanderverse_server.model.entity.PostType;
 import com.backend.wanderverse_server.model.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class PostDTO {
     private LocalDateTime updatedAt;
     private int likesCount;
     private int commentsCount;
+    private PostType postType;
     private UserDTO creator;
     private DestinationDTO destination;
 }

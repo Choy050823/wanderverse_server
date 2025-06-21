@@ -22,14 +22,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
         return authService.authenticate(loginRequest)
-                .map(response -> new ResponseEntity<>(response, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+                .map(response -> ResponseEntity.ok().body(response))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
         return authService.register(signUpRequest)
-            .map(response -> new ResponseEntity<>(response, HttpStatus.CREATED))
-            .orElse(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
+                .map(response -> ResponseEntity.ok().body(response))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null));
     }
 }

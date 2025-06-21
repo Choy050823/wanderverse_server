@@ -3,6 +3,7 @@ package com.backend.wanderverse_server.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,14 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtUtil {
     @Value("${jwt.secret}")
-    // Note: This should be kept secret and not hardcoded in production applications.
-    // It is recommended to store it in environment variables or secure vaults.
     private String jwtSecret;
 
     @Value("${jwt.expiration}")
-    private int jwtExpriationMs;
+    // JWT Expiration is in milliseconds
+    private int jwtExpirationMs;
 
     private SecretKey key;
 
@@ -43,7 +44,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + jwtExpriationMs))
+                .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -72,15 +73,15 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
-            System.out.println("Invalid JWT Signature: " + e.getMessage());
+            log.error("Invalid JWT Signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
-            System.out.println("Invalid JWT token: " + e.getMessage());
+            log.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            System.out.println("JWT Token expired: " + e.getMessage());
+            log.error("JWT Token expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
-            System.out.println("JWT Token is unsupported: " + e.getMessage());
+            log.error("JWT Token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.out.println("JWT Claims string is emoty: " + e.getMessage());
+            log.error("JWT Claims string is empty: {}", e.getMessage());
         }
         return false;
     }

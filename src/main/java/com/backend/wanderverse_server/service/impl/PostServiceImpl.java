@@ -1,20 +1,23 @@
 package com.backend.wanderverse_server.service.impl;
 
 import com.backend.wanderverse_server.model.dto.CreatePostRequestDTO;
-import com.backend.wanderverse_server.model.dto.PostDTO;
 import com.backend.wanderverse_server.model.entity.DestinationEntity;
 import com.backend.wanderverse_server.model.entity.PostEntity;
+import com.backend.wanderverse_server.model.entity.PostType;
 import com.backend.wanderverse_server.model.entity.UserEntity;
 import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.backend.wanderverse_server.repository.PostRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -28,8 +31,36 @@ public class PostServiceImpl implements PostService {
     private DestinationRepository destinationRepository;
 
     @Override
+    public Page<PostEntity> findAllSharingPosts(Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        return postRepository.findByPostTypes(Arrays.asList("post"), sortedPageable);
+    }
+
+    @Override
+    public Page<PostEntity> findAllDiscussionPosts(Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        return postRepository.findByPostTypes(Arrays.asList("experience", "questions", "tips"), sortedPageable);
+    }
+
+    @Override
     public Page<PostEntity> findAll(Pageable pageable) {
-        return postRepository.findAll(pageable);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        return postRepository.findAll(sortedPageable);
     }
 
     @Override
@@ -52,6 +83,7 @@ public class PostServiceImpl implements PostService {
                     .imageUrls(post.getImageUrls())
                     .creator(creator) // Explicitly set UserEntity
                     .destination(destination) // Explicitly set DestinationEntity
+                    .postType(convertPostType(post.getPostType()))
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .likesCount(0)
@@ -62,6 +94,15 @@ public class PostServiceImpl implements PostService {
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid ID format: " + e.getMessage());
         }
+    }
+
+    private PostType convertPostType(String postType) {
+        return switch (postType) {
+            case "experience" -> PostType.experience;
+            case "questions" -> PostType.questions;
+            case "tips" -> PostType.tips;
+            default -> PostType.post;
+        };
     }
 
     @Override

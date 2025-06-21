@@ -1,5 +1,6 @@
 package com.backend.wanderverse_server.model.dto;
 
+import com.backend.wanderverse_server.model.entity.PostType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,4 +15,5 @@ public class CreatePostRequestDTO {
     private List<String> imageUrls;
     private String creatorId;
     private String destinationId;
+    private String postType;
 }

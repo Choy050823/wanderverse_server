@@ -27,6 +27,10 @@ public class PostEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PostType postType;
+
     @ElementCollection
     @CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
     private List<String> imageUrls;
@@ -63,3 +67,4 @@ public class PostEntity {
     private DestinationEntity destination;
 
 }
+

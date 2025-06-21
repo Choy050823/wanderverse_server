@@ -27,7 +27,7 @@ public class StorageController {
         Map<String, String> response = new HashMap<>();
         // set the imageUrl and return back
         response.put("imageUrl", url);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/download/{fileName}")
@@ -45,8 +45,7 @@ public class StorageController {
                     .header("Content-Disposition", "attachment; filename=" + fileName)
                     .body(resource);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }

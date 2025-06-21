@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/post")
 public class PostController {
@@ -21,16 +23,25 @@ public class PostController {
     @Autowired
     private Mapper<PostEntity, PostDTO> postMapper;
 
-    @GetMapping(path = "/listPosts")
-    public Page<PostDTO> listPosts(Pageable pageable) {
+    @GetMapping
+    public Page<PostDTO> getAllPosts(Pageable pageable) {
         return postService.findAll(pageable).map(postMapper::mapTo);
     }
 
-    @PostMapping(path = "/create")
-    public ResponseEntity<PostDTO> createPost(@RequestBody CreatePostRequestDTO post) {
-//        boolean isExists = postService.isExists(Long.parseLong(post.getId()));
-        PostDTO savedPost = postMapper.mapTo(postService.createPost(post));
+    @GetMapping(path = "/sharing")
+    public Page<PostDTO> getSharingPosts(Pageable pageable) {
+        return postService.findAllSharingPosts(pageable).map(postMapper::mapTo);
+    }
 
-        return new ResponseEntity<>(savedPost, HttpStatus.CREATED);
+    @GetMapping(path = "/discussion")
+    public Page<PostDTO> getDiscussionPosts(Pageable pageable) {
+        return postService.findAllDiscussionPosts(pageable).map(postMapper::mapTo);
+    }
+
+    @PostMapping
+    public ResponseEntity<PostDTO> createPost(@RequestBody CreatePostRequestDTO post) {
+        return Optional.of(postMapper.mapTo(postService.createPost(post)))
+                .map((postDTO) -> ResponseEntity.status(HttpStatus.CREATED).body(postDTO))
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
     }
 }
