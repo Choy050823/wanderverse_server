@@ -34,6 +34,9 @@ jobs:
       run: |
         echo "$PRIVATE_KEY" > private.key
         chmod 600 private.key
+        mvn clean package
         scp -o StrictHostKeyChecking=no -i private.key target/wanderverse_server-0.0.1-SNAPSHOT.jar $USER@$HOSTNAME:/home/deploy/wanderverse-service/wanderverse_server-0.0.1-SNAPSHOT.jar
+        scp -o StrictHostKeyChecking=no -i private.key src/main/resources/application-prod.properties $USER@$HOSTNAME:/home/deploy/wanderverse-service/application-prod.properties
+        ssh -o StrictHostKeyChecking=no -i private.key $USER@$HOSTNAME "sudo chown deploy:deploy /home/deploy/wanderverse-service/application-prod.properties && sudo chmod 644 /home/deploy/wanderverse-service/application-prod.properties"
         ssh -o StrictHostKeyChecking=no -i private.key $USER@$HOSTNAME "sudo systemctl restart wanderverse.service"
         rm -f private.key
