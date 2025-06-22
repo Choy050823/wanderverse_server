@@ -1,13 +1,6 @@
 package com.backend.wanderverse_server.service.impl;
 
-//import com.amazonaws.HttpMethod;
-//import com.amazonaws.services.s3.AmazonS3;
-//import com.amazonaws.services.s3.model.CannedAccessControlList;
-//import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-//import com.amazonaws.services.s3.model.PutObjectRequest;
-//import com.amazonaws.services.s3.model.S3Object;
 import com.backend.wanderverse_server.service.StorageService;
-import org.apache.commons.io.IOExceptionList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,10 +11,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 

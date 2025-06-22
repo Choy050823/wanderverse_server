@@ -23,13 +23,13 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
         return authService.authenticate(loginRequest)
                 .map(response -> ResponseEntity.ok().body(response))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
         return authService.register(signUpRequest)
                 .map(response -> ResponseEntity.ok().body(response))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 }
