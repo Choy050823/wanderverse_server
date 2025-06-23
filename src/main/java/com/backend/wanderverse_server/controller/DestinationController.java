@@ -42,6 +42,6 @@ public class DestinationController {
     public ResponseEntity<DestinationDTO> createDestination(@RequestBody DestinationDTO destinationDTO) {
         DestinationEntity destinationEntity = destinationMapper.mapFrom(destinationDTO);
         DestinationEntity savedDestination = destinationService.save(destinationEntity);
-        return ResponseEntity.ok().body(destinationMapper.mapTo(savedDestination));
+        return ResponseEntity.status(HttpStatus.CREATED).body(destinationMapper.mapTo(savedDestination));
     }
 }

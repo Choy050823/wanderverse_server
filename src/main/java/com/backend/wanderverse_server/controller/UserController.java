@@ -22,7 +22,7 @@ public class UserController {
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
         UserEntity userEntity = userMapper.mapFrom(userDTO);
         UserEntity savedUser = userService.save(userEntity);
-        return ResponseEntity.status(201).body(userMapper.mapTo(savedUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userMapper.mapTo(savedUser));
     }
 
     @GetMapping(path = "/{id}")
