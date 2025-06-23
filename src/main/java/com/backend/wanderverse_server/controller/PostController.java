@@ -23,7 +23,7 @@ public class PostController {
     @Autowired
     private Mapper<PostEntity, PostDTO> postMapper;
 
-    @GetMapping
+    @GetMapping(path = "/all")
     public Page<PostDTO> getAllPosts(Pageable pageable) {
         return postService.findAll(pageable).map(postMapper::mapTo);
     }
