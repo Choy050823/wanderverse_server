@@ -30,7 +30,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
         return authService.register(signUpRequest)
-                .map(response -> ResponseEntity.ok().body(response))
+                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 }
