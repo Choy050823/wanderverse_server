@@ -10,7 +10,11 @@ public interface PostService {
 
     Page<PostEntity> findAllSharingPosts(Pageable pageable);
 
+    Page<PostEntity> findSharingPostsByDestination(String destination, Pageable pageable);
+
     Page<PostEntity> findAllDiscussionPosts(Pageable pageable);
+
+    Page<PostEntity> findDiscussionPostsByDestination(String destination, Pageable pageable);
 
     PostEntity createPost(CreatePostRequestDTO post);
 

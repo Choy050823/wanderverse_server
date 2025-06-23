@@ -25,17 +25,23 @@ public class PostController {
 
     @GetMapping(path = "/all")
     public Page<PostDTO> getAllPosts(Pageable pageable) {
-        return postService.findAll(pageable).map(postMapper::mapTo);
+        return postService
+                .findAll(pageable)
+                .map(postMapper::mapTo);
     }
 
     @GetMapping(path = "/sharing")
-    public Page<PostDTO> getSharingPosts(Pageable pageable) {
-        return postService.findAllSharingPosts(pageable).map(postMapper::mapTo);
+    public Page<PostDTO> getSharingPosts(@RequestParam String destinationId, Pageable pageable) {
+        return postService
+                .findSharingPostsByDestination(destinationId, pageable)
+                .map(postMapper::mapTo);
     }
 
     @GetMapping(path = "/discussion")
-    public Page<PostDTO> getDiscussionPosts(Pageable pageable) {
-        return postService.findAllDiscussionPosts(pageable).map(postMapper::mapTo);
+    public Page<PostDTO> getDiscussionPosts(@RequestParam String destinationId, Pageable pageable) {
+        return postService
+                .findDiscussionPostsByDestination(destinationId, pageable)
+                .map(postMapper::mapTo);
     }
 
     @PostMapping

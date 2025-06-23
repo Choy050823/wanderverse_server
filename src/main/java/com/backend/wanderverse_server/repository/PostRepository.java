@@ -14,5 +14,11 @@ public interface PostRepository extends JpaRepository<PostEntity, Long>,
         PagingAndSortingRepository<PostEntity, Long> {
 
     @Query("SELECT p FROM PostEntity p WHERE p.postType IN :postTypes ORDER BY p.createdAt DESC")
-    Page<PostEntity> findByPostTypes(@Param("postTypes") List<String> postTypes, Pageable pageable);
+    Page<PostEntity> findAllByPostTypes(@Param("postTypes") List<String> postTypes, Pageable pageable);
+
+    @Query("SELECT p FROM PostEntity p WHERE p.postType IN :postTypes AND p.destination.id = :destinationId ORDER BY p.createdAt DESC")
+    Page<PostEntity> findByPostTypesAndDestination(
+            @Param("postTypes") List<String> postTypes,
+            Long destinationId,
+            Pageable pageable);
 }

@@ -38,7 +38,27 @@ public class PostServiceImpl implements PostService {
                 pageable.getPageSize(),
                 sort
         );
-        return postRepository.findByPostTypes(Arrays.asList("post"), sortedPageable);
+        return postRepository.findAllByPostTypes(Arrays.asList("post"), sortedPageable);
+    }
+
+    @Override
+    public Page<PostEntity> findSharingPostsByDestination(String destination, Pageable pageable) {
+        if (destination.equals("all")) {
+            return findAllSharingPosts(pageable);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+
+        return postRepository.findByPostTypesAndDestination(
+                Arrays.asList("post"),
+                Long.parseLong(destination),
+                sortedPageable
+        );
     }
 
     @Override
@@ -49,7 +69,28 @@ public class PostServiceImpl implements PostService {
                 pageable.getPageSize(),
                 sort
         );
-        return postRepository.findByPostTypes(Arrays.asList("experience", "questions", "tips"), sortedPageable);
+
+        return postRepository.findAllByPostTypes(Arrays.asList("experience", "questions", "tips"), sortedPageable);
+    }
+
+    @Override
+    public Page<PostEntity> findDiscussionPostsByDestination(String destination, Pageable pageable) {
+        if (destination.equals("all")) {
+            return findAllDiscussionPosts(pageable);
+        }
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+
+        return postRepository.findByPostTypesAndDestination(
+                Arrays.asList("experience", "questions", "tips"),
+                Long.parseLong(destination),
+                sortedPageable
+        );
     }
 
     @Override
