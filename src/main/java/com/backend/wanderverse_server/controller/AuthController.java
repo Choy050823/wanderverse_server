@@ -31,6 +31,6 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
         return authService.register(signUpRequest)
                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
     }
 }
