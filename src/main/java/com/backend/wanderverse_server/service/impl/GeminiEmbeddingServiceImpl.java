@@ -1,27 +1,24 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.service.GeminiService;
+import com.backend.wanderverse_server.service.GeminiEmbeddingService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
-public class GeminiServiceImpl implements GeminiService {
+public class GeminiEmbeddingServiceImpl implements GeminiEmbeddingService {
 
     @Value("${google.api.key}")
     private String googleApiKey;
@@ -56,11 +53,11 @@ public class GeminiServiceImpl implements GeminiService {
             log.warn("TaskType cannot be empty. Using default or consider optional");
         }
 
-        // Retry 3 times mechanism
+        // Retry 3-times mechanism
         int maxRetries = 3;
         long delayMillis = 1000;
 
-        String requestBody = String.format(
+        String embeddingRequest = String.format(
                 "{\"model\": \"models/" + embeddingModelName + "\", \"content\": { \"parts\":[{ \"text\": \"%s\"}]}, \"taskType\": \"SEMANTIC_SIMILARITY\" }",
                 // Sanitize text if it contains quotes or special characters for direct insertion
                 text.replace("\"", "\\\"").replace("\n", "\\n")
@@ -73,7 +70,7 @@ public class GeminiServiceImpl implements GeminiService {
                         .uri("https://generativelanguage.googleapis.com/v1beta/models/" + embeddingModelName +":embedContent")
                         .header("x-goog-api-key", googleApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(requestBody)
+                        .bodyValue(embeddingRequest)
                         .retrieve()
                         .bodyToMono(Map.class)
                         .retryWhen(Retry.backoff(maxRetries - 1, Duration.ofMillis(delayMillis))

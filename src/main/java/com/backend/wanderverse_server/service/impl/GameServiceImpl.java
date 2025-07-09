@@ -6,8 +6,6 @@ import com.backend.wanderverse_server.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class GameServiceImpl implements GameService {
     @Autowired

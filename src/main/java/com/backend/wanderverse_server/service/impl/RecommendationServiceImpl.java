@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class RecommendationServiceImpl implements RecommendationService {
     @Autowired
-    private GeminiService geminiService;
+    private GeminiEmbeddingService geminiEmbeddingService;
 
     @Autowired
     private QdrantService qdrantService;
@@ -60,7 +58,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         allPosts.forEach(
                 post -> {
                     String textToEmbed = post.getTitle() + " " + post.getContent();
-                    List<Float> embedding = geminiService.getEmbeddings(textToEmbed, "RETRIEVAL_DOCUMENT");
+                    List<Float> embedding = geminiEmbeddingService.getEmbeddings(textToEmbed, "RETRIEVAL_DOCUMENT");
 
                     if (embedding != null) {
                         postsBatch.add(post);
@@ -126,7 +124,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         log.info("Getting generic recommendations for query: '{}'", query);
 
-        List<Float> queryEmbedding = geminiService.getEmbeddings(query, "RETRIEVAL_QUERY");
+        List<Float> queryEmbedding = geminiEmbeddingService.getEmbeddings(query, "RETRIEVAL_QUERY");
 
         if (queryEmbedding == null) {
             log.error("Failed to generate embedding for query: '{}'", query);
