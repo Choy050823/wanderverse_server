@@ -1,5 +1,6 @@
-package com.backend.wanderverse_server.model.entity;
+package com.backend.wanderverse_server.model.entity.post;
 
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

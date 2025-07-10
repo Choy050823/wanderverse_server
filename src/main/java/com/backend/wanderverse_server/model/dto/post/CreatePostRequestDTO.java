@@ -1,6 +1,5 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.post;
 
-import com.backend.wanderverse_server.model.entity.PostType;
 import lombok.Builder;
 import lombok.Data;
 

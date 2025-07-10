@@ -1,6 +1,5 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.post;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,17 +8,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class UserDTO {
-
+public class DestinationDTO {
     private long id;
-    private String username;
-    private String email;
+    private String name;
     private String description;
-    private String profilePicUrl;
-    private int gamePoints;
+    private String imageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

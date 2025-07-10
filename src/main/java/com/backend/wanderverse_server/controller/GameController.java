@@ -13,15 +13,15 @@ public class GameController {
     private GameService gameService;
 
     @GetMapping(path = "/points")
-    public ResponseEntity<Integer> getGamePoints(@RequestParam String userId) {
-        Integer gamePoint = gameService.getGamePoints(Long.parseLong(userId));
+    public ResponseEntity<Integer> getGamePoints(@RequestParam Long userId) {
+        Integer gamePoint = gameService.getGamePoints(userId);
         return gamePoint != null ? ResponseEntity.ok().body(gamePoint)
                                  : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @PostMapping(path = "/points")
-    public ResponseEntity<Integer> addGamePoints(@RequestParam String userId, @RequestParam String newGamePoint) {
-        Integer gamePoint = gameService.addGamePoints(Long.parseLong(userId), Integer.parseInt(newGamePoint));
+    public ResponseEntity<Integer> addGamePoints(@RequestParam Long userId, @RequestParam Integer newGamePoint) {
+        Integer gamePoint = gameService.addGamePoints(userId, newGamePoint);
         return gamePoint != null ? ResponseEntity.status(HttpStatus.CREATED).body(gamePoint)
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }

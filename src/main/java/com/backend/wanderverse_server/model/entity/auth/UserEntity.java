@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.model.entity;
+package com.backend.wanderverse_server.model.entity.auth;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

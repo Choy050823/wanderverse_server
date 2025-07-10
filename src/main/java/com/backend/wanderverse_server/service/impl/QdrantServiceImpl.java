@@ -1,6 +1,6 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.entity.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import com.backend.wanderverse_server.repository.PostRepository;
 import com.backend.wanderverse_server.service.QdrantService;
 import io.qdrant.client.QdrantClient;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import static io.qdrant.client.VectorsFactory.namedVectors;
 import static io.qdrant.client.VectorFactory.vector;
 import static io.qdrant.client.QueryFactory.nearest;
 import static io.qdrant.client.QueryFactory.recommend;
@@ -28,31 +27,17 @@ import java.util.stream.Stream;
 @Slf4j
 public class QdrantServiceImpl implements QdrantService {
 
-    @Value("${qdrant.host}")
-    private String qdrantHost;
-
-    @Value("${qdrant.api.key}")
-    private String qdrantApiKey;
-
     @Value("${qdrant.collection.name}")
     private String collectionName;
 
     @Value("${qdrant.embedding.dimension}")
     private int embeddingDimension;
 
+    @Autowired
     private QdrantClient qdrantClient;
 
     @Autowired
     private PostRepository postRepository;
-
-    @PostConstruct
-    public void init() {
-        this.qdrantClient = new QdrantClient(QdrantGrpcClient.newBuilder(
-                qdrantHost,
-                6334,
-                true
-        ).withApiKey(this.qdrantApiKey).build());
-    }
 
     @Override
     public void createCollection() {

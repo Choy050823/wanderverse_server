@@ -1,7 +1,7 @@
 package com.backend.wanderverse_server.service;
 
-import com.backend.wanderverse_server.model.dto.CreatePostRequestDTO;
-import com.backend.wanderverse_server.model.entity.PostEntity;
+import com.backend.wanderverse_server.model.dto.post.CreatePostRequestDTO;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

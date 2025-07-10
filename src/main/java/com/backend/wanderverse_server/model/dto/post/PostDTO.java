@@ -1,9 +1,6 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.post;
 
-import com.backend.wanderverse_server.model.entity.DestinationEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
-import com.backend.wanderverse_server.model.entity.UserEntity;
-import jakarta.persistence.*;
+import com.backend.wanderverse_server.model.entity.post.PostType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

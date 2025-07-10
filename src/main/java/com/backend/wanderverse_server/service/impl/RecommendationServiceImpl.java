@@ -1,7 +1,7 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostType;
 import com.backend.wanderverse_server.repository.PostRepository;
 import com.backend.wanderverse_server.service.*;
 import jakarta.transaction.Transactional;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class RecommendationServiceImpl implements RecommendationService {
     @Autowired
-    private GeminiEmbeddingService geminiEmbeddingService;
+    private EmbeddingService embeddingService;
 
     @Autowired
     private QdrantService qdrantService;
@@ -42,7 +42,6 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     @Scheduled(fixedRateString = "${ingestion.schedule.rate}")
-//    @EventListener(ApplicationReadyEvent.class)
     public void ingestPostData() {
         log.info("Starting post data ingestion from PostgreSQL...");
         qdrantService.createCollection();
@@ -58,7 +57,7 @@ public class RecommendationServiceImpl implements RecommendationService {
         allPosts.forEach(
                 post -> {
                     String textToEmbed = post.getTitle() + " " + post.getContent();
-                    List<Float> embedding = geminiEmbeddingService.getEmbeddings(textToEmbed, "RETRIEVAL_DOCUMENT");
+                    List<Float> embedding = embeddingService.getEmbeddings(textToEmbed, "RETRIEVAL_DOCUMENT");
 
                     if (embedding != null) {
                         postsBatch.add(post);
@@ -124,7 +123,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         log.info("Getting generic recommendations for query: '{}'", query);
 
-        List<Float> queryEmbedding = geminiEmbeddingService.getEmbeddings(query, "RETRIEVAL_QUERY");
+        List<Float> queryEmbedding = embeddingService.getEmbeddings(query, "RETRIEVAL_QUERY");
 
         if (queryEmbedding == null) {
             log.error("Failed to generate embedding for query: '{}'", query);

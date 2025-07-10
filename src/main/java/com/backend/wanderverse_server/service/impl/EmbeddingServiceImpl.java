@@ -1,8 +1,9 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.service.GeminiEmbeddingService;
+import com.backend.wanderverse_server.service.EmbeddingService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,9 +19,9 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class GeminiEmbeddingServiceImpl implements GeminiEmbeddingService {
+public class EmbeddingServiceImpl implements EmbeddingService {
 
-    @Value("${google.api.key}")
+    @Value("${gemini.api.key}")
     private String googleApiKey;
 
     @Value("${gemini.embedding.model.name}")
@@ -29,18 +30,8 @@ public class GeminiEmbeddingServiceImpl implements GeminiEmbeddingService {
     @Value("${qdrant.embedding.dimension}")
     private int embeddingDimension;
 
-    private WebClient webClient;
-
-    @PostConstruct
-    public void init() {
-        this.webClient = WebClient.builder()
-//            .baseUrl("https://generativelanguage.googleapis.com/v1beta/")
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .defaultHeader("x-goog-api-key", googleApiKey)
-                .build();
-
-        log.info("Gemini API URL configured");
-    }
+    @Autowired
+    private WebClient embeddingModelWebClient;
 
     @Override
     public List<Float> getEmbeddings(String text, String taskType) {
@@ -56,21 +47,26 @@ public class GeminiEmbeddingServiceImpl implements GeminiEmbeddingService {
         // Retry 3-times mechanism
         int maxRetries = 3;
         long delayMillis = 1000;
-
-        String embeddingRequest = String.format(
-                "{\"model\": \"models/" + embeddingModelName + "\", \"content\": { \"parts\":[{ \"text\": \"%s\"}]}, \"taskType\": \"SEMANTIC_SIMILARITY\" }",
-                // Sanitize text if it contains quotes or special characters for direct insertion
-                text.replace("\"", "\\\"").replace("\n", "\\n")
+        Map<String, Object> requestBody = Map.of(
+                "model", "models/" + embeddingModelName,
+                "content", Map.of(
+                        "parts", List.of(
+                                Map.of("text", text)
+                        )
+                ),
+                "taskType", taskType == null ? "SEMANTIC_SIMILARITY" : taskType
         );
 
         for (int retry = 0; retry < maxRetries; retry++) {
             try {
                 @SuppressWarnings("rawtypes")
-                Mono<Map> responseMono = webClient.post()
-                        .uri("https://generativelanguage.googleapis.com/v1beta/models/" + embeddingModelName +":embedContent")
+                Mono<Map> responseMono = embeddingModelWebClient.post()
+                        .uri(uriBuilder -> uriBuilder.pathSegment(
+                                "v1beta", "models", embeddingModelName +":embedContent"
+                        ).build())
                         .header("x-goog-api-key", googleApiKey)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(embeddingRequest)
+                        .bodyValue(requestBody)
                         .retrieve()
                         .bodyToMono(Map.class)
                         .retryWhen(Retry.backoff(maxRetries - 1, Duration.ofMillis(delayMillis))

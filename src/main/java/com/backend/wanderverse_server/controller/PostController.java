@@ -1,9 +1,9 @@
 package com.backend.wanderverse_server.controller;
 
-import com.backend.wanderverse_server.model.dto.CreatePostRequestDTO;
-import com.backend.wanderverse_server.model.dto.PostDTO;
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
+import com.backend.wanderverse_server.model.dto.post.CreatePostRequestDTO;
+import com.backend.wanderverse_server.model.dto.post.PostDTO;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostType;
 import com.backend.wanderverse_server.model.mappers.Mapper;
 import com.backend.wanderverse_server.service.PostService;
 import com.backend.wanderverse_server.service.RecommendationService;

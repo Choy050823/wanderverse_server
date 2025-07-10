@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.post;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,10 +1,10 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.dto.CreatePostRequestDTO;
-import com.backend.wanderverse_server.model.entity.DestinationEntity;
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.dto.post.CreatePostRequestDTO;
+import com.backend.wanderverse_server.model.entity.post.DestinationEntity;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostType;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.PostService;

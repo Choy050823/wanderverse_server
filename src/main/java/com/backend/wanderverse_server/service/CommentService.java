@@ -1,8 +1,8 @@
 package com.backend.wanderverse_server.service;
 
-import com.backend.wanderverse_server.model.dto.CommentDTO;
-import com.backend.wanderverse_server.model.dto.CommentRequestDTO;
-import com.backend.wanderverse_server.model.entity.CommentEntity;
+import com.backend.wanderverse_server.model.dto.post.CommentDTO;
+import com.backend.wanderverse_server.model.dto.post.CommentRequestDTO;
+import com.backend.wanderverse_server.model.entity.post.CommentEntity;
 
 import java.util.List;
 

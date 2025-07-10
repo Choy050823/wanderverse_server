@@ -1,7 +1,7 @@
 package com.backend.wanderverse_server.service;
 
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostType;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.entity.DestinationEntity;
+import com.backend.wanderverse_server.model.entity.post.DestinationEntity;
 import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.service.DestinationService;
 import org.springframework.beans.factory.annotation.Autowired;
