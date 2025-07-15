@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,4 +22,5 @@ public class UserDTO {
     private int gamePoints;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> badgesUrls;
 }

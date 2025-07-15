@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
@@ -24,5 +26,19 @@ public class GameController {
         Integer gamePoint = gameService.addGamePoints(userId, newGamePoint);
         return gamePoint != null ? ResponseEntity.status(HttpStatus.CREATED).body(gamePoint)
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    @GetMapping(path = "/badges")
+    public ResponseEntity<List<String>> getUserBadges(@RequestParam Long userId) {
+        return ResponseEntity.ok().body(gameService.getUserAchievementBadgesImageUrl(userId));
+    }
+
+    @PostMapping(path = "/badges")
+    public ResponseEntity<String> achievementUnlocked(@RequestParam Long userId, @RequestParam String achievementName) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(gameService.achievementUnlocked(userId, achievementName));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

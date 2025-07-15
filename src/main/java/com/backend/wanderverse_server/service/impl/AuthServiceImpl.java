@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     public Optional<AuthResponseDTO> register(SignUpRequestDTO signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             log.error("User exists");
-            return Optional.empty();
+            throw new RuntimeException("User Already Exists!");
         }
 
         try {

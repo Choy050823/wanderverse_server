@@ -20,6 +20,9 @@ public class AIConfig {
     @Value("${google.genai.use.vertexai}")
     private boolean useVertexAI;
 
+//    @Value("${gemini.api.key}")
+//    private String aiApiKey;
+
     // Embedding Model credentials
     @Value("${google.embedding.baseurl}")
     private String googleEmbeddingBaseUrl;
@@ -37,6 +40,7 @@ public class AIConfig {
                 .project(googleCloudProjectId)
                 .location(googleCloudProjectLocation)
                 .vertexAI(useVertexAI)
+//                .apiKey(aiApiKey)
                 .build();
     }
 

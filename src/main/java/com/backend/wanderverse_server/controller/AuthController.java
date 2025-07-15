@@ -29,8 +29,13 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
-        return authService.register(signUpRequest)
-                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+        try {
+            return authService.register(signUpRequest)
+                    .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
+                    .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
     }
 }
