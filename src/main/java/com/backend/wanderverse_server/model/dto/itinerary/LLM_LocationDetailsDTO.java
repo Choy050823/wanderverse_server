@@ -15,4 +15,14 @@ public class LLM_LocationDetailsDTO {
     private String editorialSummary;
     private String formattedAddress;
     private double rating;
+
+//    @Override
+//    public String toString() {
+//        return placeId + " " + editorialSummary + "\n";
+//                "[" + "placeId: " + placeId
+//                + " name: " + name
+//                + " editorialSummary: " +editorialSummary
+//                + " formattedAddress: " + formattedAddress
+//                + " rating: " + rating + "]\n";
+//    }
 }

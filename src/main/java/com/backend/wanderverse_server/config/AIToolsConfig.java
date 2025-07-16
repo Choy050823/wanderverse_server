@@ -1,7 +1,5 @@
 package com.backend.wanderverse_server.config;
 
-//import com.backend.wanderverse_server.service.PlacesService;
-//import com.backend.wanderverse_server.service.RoutesService;
 import com.backend.wanderverse_server.service.impl.PlacesServiceImpl;
 import com.backend.wanderverse_server.service.impl.RoutesServiceImpl;
 import com.google.common.collect.ImmutableList;
