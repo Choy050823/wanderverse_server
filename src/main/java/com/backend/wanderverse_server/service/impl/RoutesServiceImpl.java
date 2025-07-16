@@ -7,6 +7,7 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -137,17 +138,7 @@ public class RoutesServiceImpl {
 
     private static Instant parseDepartureTime(String departureTime) {
         try {
-            String formattedDepartureTime = departureTime;
-            // Check if time part exists and if seconds are missing
-            if (formattedDepartureTime.contains("T") && formattedDepartureTime.split(":").length == 2) {
-                // Append seconds if they are missing
-                formattedDepartureTime = formattedDepartureTime.replace("Z", "") + ":00";
-            }
-
-            // Ensure the string ends with a UTC zone identifier if it doesn't have an offset
-            if (!formattedDepartureTime.endsWith("Z") && !formattedDepartureTime.matches(".*[+-]\\d{2}:\\d{2}$")) {
-                formattedDepartureTime += "Z";
-            }
+            String formattedDepartureTime = getFormattedDepartureTime(departureTime);
             log.info("Formatted departureTime for parsing: {}", formattedDepartureTime);
             return Instant.parse(formattedDepartureTime);
         } catch (DateTimeParseException e) {
@@ -155,6 +146,22 @@ public class RoutesServiceImpl {
             // Fallback to a safe default
             return Instant.now().plusSeconds(300).truncatedTo(ChronoUnit.SECONDS);
         }
+    }
+
+    @NotNull
+    private static String getFormattedDepartureTime(String departureTime) {
+        String formattedDepartureTime = departureTime;
+        // Check if time part exists and if seconds are missing
+        if (formattedDepartureTime.contains("T") && formattedDepartureTime.split(":").length == 2) {
+            // Append seconds if they are missing
+            formattedDepartureTime = formattedDepartureTime.replace("Z", "") + ":00";
+        }
+
+        // Ensure the string ends with a UTC zone identifier if it doesn't have an offset
+        if (!formattedDepartureTime.endsWith("Z") && !formattedDepartureTime.matches(".*[+-]\\d{2}:\\d{2}$")) {
+            formattedDepartureTime += "Z";
+        }
+        return formattedDepartureTime;
     }
 
     private static CompletableFuture<List<TravelDetailsDTO>> executeRouteRequest(
