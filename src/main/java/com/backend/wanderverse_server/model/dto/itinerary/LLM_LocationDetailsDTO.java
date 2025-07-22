@@ -11,17 +11,18 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LLM_LocationDetailsDTO {
     private String placeId;
-    private String name;
-    private String editorialSummary;
-    private String formattedAddress;
-    private double rating;
+//    private String name;
+//    private String editorialSummary;
+//    private String formattedAddress;
+//    private double rating;
 
     @Override
     public String toString() {
         return "[" + "placeId: " + placeId
-                + " name: " + name
-                + " editorialSummary: " +editorialSummary
-                + " formattedAddress: " + formattedAddress
-                + " rating: " + rating + "]\n";
+//                + " name: " + name
+//                + " editorialSummary: " +editorialSummary
+//                + " formattedAddress: " + formattedAddress
+//                + " rating: " + rating
+                + "]\n";
     }
 }

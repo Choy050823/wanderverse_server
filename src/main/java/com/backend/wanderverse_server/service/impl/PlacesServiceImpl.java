@@ -92,10 +92,10 @@ public class PlacesServiceImpl {
 
                 return LLM_LocationDetailsDTO.builder()
                         .placeId(locationDetails.getPlaceId())
-                        .name(locationDetails.getName())
-                        .editorialSummary(locationDetails.getEditorialSummary())
-                        .formattedAddress(locationDetails.getFormattedAddress())
-                        .rating(locationDetails.getRating())
+//                        .name(locationDetails.getName())
+//                        .editorialSummary(locationDetails.getEditorialSummary())
+//                        .formattedAddress(locationDetails.getFormattedAddress())
+//                        .rating(locationDetails.getRating())
                         .build();
 
             } catch (Exception e) {
@@ -139,10 +139,10 @@ public class PlacesServiceImpl {
                         .filter(Objects::nonNull)
                         .map(locationDetails -> LLM_LocationDetailsDTO.builder()
                                 .placeId(locationDetails.getPlaceId())
-                                .name(locationDetails.getName())
-                                .editorialSummary(locationDetails.getEditorialSummary())
-                                .formattedAddress(locationDetails.getFormattedAddress())
-                                .rating(locationDetails.getRating())
+//                                .name(locationDetails.getName())
+//                                .editorialSummary(locationDetails.getEditorialSummary())
+//                                .formattedAddress(locationDetails.getFormattedAddress())
+//                                .rating(locationDetails.getRating())
                                 .build())
                         .toList();
             } catch (Exception e) {

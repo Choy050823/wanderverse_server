@@ -112,7 +112,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                     "**STEP 5: CONSTRUCT THE FINAL JSON**\n" +
                     "   - Using the optimized route data, build the `activityList`.\n" +
                     "   - The list MUST start with a 'destination' activity (the starting point) and MUST end with a 'destination' activity (the final dinner restaurant).\n" +
-                    "   - For every 'destination' activity, include a complete `locationDetails` block with `placeId` and `name` from `textSearch` or `nearbySearch` results. Do not leave it empty.\n" +
+                    "   - For every 'destination' activity, include a complete `locationDetails` block with `placeId` from `textSearch` or `nearbySearch` results. Do not leave it empty.\n" +
                     "   - Set `estimatedStartTime` and `estimatedEndTime` for each activity in ISO 8601 format with UTC timezone, e.g., `2025-10-01T09:00:00Z`.\n\n" +
 
                     "## 3. CONTEXT & JSON SCHEMA\n" +
@@ -136,7 +136,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
             "      \"estimatedEndTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
             "      \"locationDetails\": {\n" +
             "        \"placeId\": \"string\",\n" +
-            "        \"name\": \"string\"\n" +
+//            "        \"name\": \"string\"\n" +
             "      },\n" +
             "      \"travelDetails\": {\n" +
             "        \"origin\": \"string\",\n" +
@@ -400,7 +400,10 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                 size--;
                 lastActivity = previousDayItinerary.getActivityList().get(size);
             }
-            currentDayStartLocation = lastActivity.getLocationDetails().getName();
+//            currentDayStartLocation = lastActivity.getLocationDetails().getName();
+            currentDayStartLocation = PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()) != null
+                    ? PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()).getName()
+                    : tripOverview.getMainDestination();
         }
         return currentDayStartLocation;
     }
