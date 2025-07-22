@@ -1,5 +1,6 @@
 package com.backend.wanderverse_server.service;
 
+import com.backend.wanderverse_server.model.dto.post.PostDTO;
 import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import com.backend.wanderverse_server.model.entity.post.PostType;
 
@@ -9,7 +10,7 @@ public interface RecommendationService {
 
     void ingestPostData();
 
-    List<PostEntity> getRecommendedPostsForUser(Long userId, PostType postType);
+    List<PostDTO> getRecommendedPostsForUser(Long userId, PostType postType);
 
-    List<PostEntity> getRecommendedPostsByQuery(String query, PostType postType);
+    List<PostDTO> getRecommendedPostsByQuery(String query, PostType postType);
 }

@@ -9,6 +9,7 @@ import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -105,6 +106,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @CachePut(cacheNames = "posts", keyGenerator = "cacheKeyGenerator")
     public PostEntity createPost(CreatePostRequestDTO post) {
         try {
             // Validate and parse creatorId

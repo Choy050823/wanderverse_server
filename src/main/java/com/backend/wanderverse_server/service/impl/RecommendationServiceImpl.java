@@ -1,7 +1,9 @@
 package com.backend.wanderverse_server.service.impl;
 
+import com.backend.wanderverse_server.model.dto.post.PostDTO;
 import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import com.backend.wanderverse_server.model.entity.post.PostType;
+import com.backend.wanderverse_server.model.mappers.Mapper;
 import com.backend.wanderverse_server.repository.PostRepository;
 import com.backend.wanderverse_server.service.*;
 import jakarta.transaction.Transactional;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +33,9 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private Mapper<PostEntity, PostDTO> postMapper;
 
     @Value("${recommendation.batch.size.embedding}")
     private int embeddingBatchSize;
@@ -87,7 +93,8 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     @Transactional
-    public List<PostEntity> getRecommendedPostsForUser(Long userId, PostType postType) {
+    @Cacheable(value = "recommended_posts", key = "'post:rec:user:' + #userId + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
+    public List<PostDTO> getRecommendedPostsForUser(Long userId, PostType postType) {
         log.info("Getting personalized recommendations for user: {}", userId);
         List<Long> interactedPostIdList = likeService.getUserLikedPostByUserId(userId);
 
@@ -96,8 +103,6 @@ public class RecommendationServiceImpl implements RecommendationService {
             return List.of();
         }
 
-        // the interacted posts are posts that need to be considered when recommending
-        // but also need to filter out when recommend it
         List<PostEntity> posts = qdrantService.recommendPosts(
                 interactedPostIdList,
                 recommendPostLimit,
@@ -110,12 +115,15 @@ public class RecommendationServiceImpl implements RecommendationService {
             Hibernate.initialize(post.getDestination());
         });
 
-        return posts;
+        return posts.stream()
+                .map(postMapper::mapTo)
+                .toList();
     }
 
     @Override
     @Transactional
-    public List<PostEntity> getRecommendedPostsByQuery(String query, PostType postType) {
+    @Cacheable(value = "query_posts", key = "'post:query:' + T(java.util.Base64).getEncoder().encodeToString(#query.getBytes()).substring(0,22) + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
+    public List<PostDTO> getRecommendedPostsByQuery(String query, PostType postType) {
         if (query == null || query.isBlank()) {
             log.error("Query cannot be empty!");
             return List.of();
@@ -144,6 +152,8 @@ public class RecommendationServiceImpl implements RecommendationService {
             Hibernate.initialize(post.getDestination());
         });
 
-        return posts;
+        return posts.stream()
+                .map(postMapper::mapTo)
+                .toList();
     }
 }

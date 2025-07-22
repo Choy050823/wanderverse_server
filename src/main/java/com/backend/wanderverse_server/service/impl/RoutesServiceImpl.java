@@ -45,9 +45,9 @@ public class RoutesServiceImpl {
     public static List<TravelDetailsDTO> getBasicRoute(String origin, String destination, String travelMode) {
         log.info("Calculating basic route from {} to {} via {}", origin, destination, travelMode);
         return CompletableFuture.supplyAsync(() -> DirectionsApi.newRequest(geoApiContext)
-                .origin(origin)
-                .destination(destination)
-                .mode(TravelMode.valueOf(travelMode.toUpperCase())), executorService)
+                        .origin(origin)
+                        .destination(destination)
+                        .mode(TravelMode.valueOf(travelMode.toUpperCase())), executorService)
                 .thenComposeAsync(request ->
                         executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
     }
@@ -82,22 +82,22 @@ public class RoutesServiceImpl {
                 origin, destination, travelMode, intermediateWaypoints);
 
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                String[] intermediateWayPointArr = intermediateWaypoints.split(",");
+                    try {
+                        String[] intermediateWayPointArr = intermediateWaypoints.split(",");
 
-                return DirectionsApi.newRequest(geoApiContext)
-                        .origin(origin)
-                        .destination(destination)
-                        .mode(TravelMode.valueOf(travelMode.toUpperCase()))
-                        .waypoints(intermediateWayPointArr)
-                        .optimizeWaypoints(true)
-                        .departureTime(parseDepartureTime(departureTime))
-                        .trafficModel(TrafficModel.BEST_GUESS);
-            } catch (Exception e) {
-                log.error("Error computing routes for optimized waypoint: {}", e.getMessage());
-                return null;
-            }
-        }, executorService)
+                        return DirectionsApi.newRequest(geoApiContext)
+                                .origin(origin)
+                                .destination(destination)
+                                .mode(TravelMode.valueOf(travelMode.toUpperCase()))
+                                .waypoints(intermediateWayPointArr)
+                                .optimizeWaypoints(true)
+                                .departureTime(parseDepartureTime(departureTime))
+                                .trafficModel(TrafficModel.BEST_GUESS);
+                    } catch (Exception e) {
+                        log.error("Error computing routes for optimized waypoint: {}", e.getMessage());
+                        return null;
+                    }
+                }, executorService)
                 .thenComposeAsync(request ->
                         executeRouteRequest(request, TravelMode.valueOf(travelMode))).join();
 
@@ -108,28 +108,28 @@ public class RoutesServiceImpl {
                 origin, destination, travelMode, avoidTolls, avoidHighways, avoidFerries);
 
         return CompletableFuture.supplyAsync(() -> {
-            DirectionsApiRequest request = DirectionsApi.newRequest(geoApiContext)
-                    .origin(origin)
-                    .destination(destination)
-                    .mode(TravelMode.valueOf(travelMode.toUpperCase()))
-                    .optimizeWaypoints(true)
-                    .departureTime(parseDepartureTime(departureTime))
-                    .trafficModel(TrafficModel.BEST_GUESS);
+                    DirectionsApiRequest request = DirectionsApi.newRequest(geoApiContext)
+                            .origin(origin)
+                            .destination(destination)
+                            .mode(TravelMode.valueOf(travelMode.toUpperCase()))
+                            .optimizeWaypoints(true)
+                            .departureTime(parseDepartureTime(departureTime))
+                            .trafficModel(TrafficModel.BEST_GUESS);
 
-            if (avoidTolls) {
-                request.avoid(DirectionsApi.RouteRestriction.TOLLS);
-            }
+                    if (avoidTolls) {
+                        request.avoid(DirectionsApi.RouteRestriction.TOLLS);
+                    }
 
-            if (avoidHighways) {
-                request.avoid(DirectionsApi.RouteRestriction.HIGHWAYS);
-            }
+                    if (avoidHighways) {
+                        request.avoid(DirectionsApi.RouteRestriction.HIGHWAYS);
+                    }
 
-            if (avoidFerries) {
-                request.avoid(DirectionsApi.RouteRestriction.FERRIES);
-            }
+                    if (avoidFerries) {
+                        request.avoid(DirectionsApi.RouteRestriction.FERRIES);
+                    }
 
-            return request;
-        }, executorService)
+                    return request;
+                }, executorService)
                 .thenComposeAsync(request ->
                         executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
     }

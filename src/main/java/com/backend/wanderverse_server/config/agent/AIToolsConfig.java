@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.config;
+package com.backend.wanderverse_server.config.agent;
 
 import com.backend.wanderverse_server.service.impl.PlacesServiceImpl;
 import com.backend.wanderverse_server.service.impl.RoutesServiceImpl;
@@ -23,18 +23,18 @@ public class AIToolsConfig {
             Method nearbySearchMethod = PlacesServiceImpl.class.getMethod("nearbySearch", double.class, double.class, int.class, String.class);
 
             // Routes Service Methods
-            Method getFixedWaypointRouteMethod = RoutesServiceImpl.class.getMethod("getFixedWaypointRoute", String.class, String.class, String.class, String.class, String.class);
+//            Method getFixedWaypointRouteMethod = RoutesServiceImpl.class.getMethod("getFixedWaypointRoute", String.class, String.class, String.class, String.class, String.class);
             Method getOptimizedWaypointRouteMethod = RoutesServiceImpl.class.getMethod("getOptimizedWaypointRoute", String.class, String.class, String.class, String.class, String.class);
-            Method getRouteWithAvoidanceMethod = RoutesServiceImpl.class.getMethod("getRouteWithAvoidance", String.class, String.class, String.class, boolean.class, boolean.class, boolean.class, String.class);
+//            Method getRouteWithAvoidanceMethod = RoutesServiceImpl.class.getMethod("getRouteWithAvoidance", String.class, String.class, String.class, boolean.class, boolean.class, boolean.class, String.class);
 
             return ImmutableList.of(
                     Tool.builder()
                             .functions(
                                     textSearchMethod,
                                     nearbySearchMethod,
-                                    getFixedWaypointRouteMethod,
-                                    getOptimizedWaypointRouteMethod,
-                                    getRouteWithAvoidanceMethod
+//                                    getFixedWaypointRouteMethod,
+                                    getOptimizedWaypointRouteMethod
+//                                    getRouteWithAvoidanceMethod
                             ).build()
             );
         } catch (Exception e) {

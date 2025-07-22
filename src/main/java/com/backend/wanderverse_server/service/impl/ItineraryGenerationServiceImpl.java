@@ -28,6 +28,12 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
     @Autowired
     private List<Tool> aiAgentTools;
 
+    @Autowired
+    private PlacesServiceImpl placesService;
+
+    @Autowired
+    private RoutesServiceImpl routesService;
+
     @Value("${google.gemini.model}")
     private String LLM_Model;
 
@@ -351,7 +357,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
             return generatedTripPlan;
 
         } catch (Exception e) {
-            log.error("Error generating itinerary or parsing response: {}" , e.getMessage());
+            log.error("Error generating itinerary or parsing response: {}" , e.getMessage(), e);
             return null;
         }
     }
@@ -403,7 +409,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
         try {
             log.info("Start to parse response");
             String rawResponse = response.text();
-//            log.info("Received raw response from AI: {}", rawResponse);
+            log.info("Received raw response from AI: {}", rawResponse);
 
             if (rawResponse == null || rawResponse.isEmpty()) {
                 log.error("Empty OR null response from AI Agent");
@@ -420,6 +426,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                 return objectMapper.readValue(cleanJson, valueType);
             } else {
                 log.error("Could not find a valid JSON object in the AI response.");
+//                log.info();
                 return null;
             }
         } catch (Exception e) {

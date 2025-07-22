@@ -59,9 +59,9 @@ public class PostController {
         return ResponseEntity.ok().body(
                 recommendationService
                         .getRecommendedPostsByQuery(query, PostType.post)
-                        .stream()
-                        .map(postMapper::mapTo)
-                        .toList()
+//                        .stream()
+//                        .map(postMapper::mapTo)
+//                        .toList()
         );
     }
 
@@ -70,9 +70,9 @@ public class PostController {
         return ResponseEntity.ok().body(
                 recommendationService
                         .getRecommendedPostsByQuery(query, PostType.experience)
-                        .stream()
-                        .map(postMapper::mapTo)
-                        .toList()
+//                        .stream()
+//                        .map(postMapper::mapTo)
+//                        .toList()
         );
     }
 
@@ -81,9 +81,9 @@ public class PostController {
         return ResponseEntity.ok().body(
                 recommendationService
                         .getRecommendedPostsForUser(userId, PostType.post)
-                        .stream()
-                        .map(postMapper::mapTo)
-                        .toList()
+//                        .stream()
+//                        .map(postMapper::mapFrom)
+//                        .toList()
         );
     }
 
@@ -92,9 +92,9 @@ public class PostController {
         return ResponseEntity.ok().body(
                 recommendationService
                         .getRecommendedPostsForUser(userId, PostType.experience)
-                        .stream()
-                        .map(postMapper::mapTo)
-                        .toList()
+//                        .stream()
+//                        .map(postMapper::mapFrom)
+//                        .toList()
         );
     }
 

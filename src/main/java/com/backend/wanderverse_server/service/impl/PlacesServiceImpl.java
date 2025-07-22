@@ -31,7 +31,7 @@ public class PlacesServiceImpl {
     private StorageService injectedStorageService;
 
     @Value("${google.maps.platform.api.key}")
-    private static String googleMapsApiKey;
+    private String googleMapsApiKey;
 
     @Value("${spring.executor.thread.pool.size}")
     private int executorSize;

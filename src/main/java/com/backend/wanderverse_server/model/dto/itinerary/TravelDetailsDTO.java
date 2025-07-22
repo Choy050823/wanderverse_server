@@ -1,6 +1,9 @@
 package com.backend.wanderverse_server.model.dto.itinerary;
 
 import com.google.maps.model.TravelMode;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TravelDetailsDTO {
+    private Long id;
     private String origin;
     private String destination;
     private TravelMode mode;

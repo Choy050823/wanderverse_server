@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.config;
+package com.backend.wanderverse_server.config.agent;
 
 import com.google.maps.GeoApiContext;
 import com.google.maps.PlaceDetailsRequest;

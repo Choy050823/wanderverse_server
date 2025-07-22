@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.config;
+package com.backend.wanderverse_server.config.agent;
 
 import com.google.genai.Client;
 import io.qdrant.client.QdrantClient;
