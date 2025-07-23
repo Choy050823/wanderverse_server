@@ -4,7 +4,6 @@ import com.backend.wanderverse_server.model.dto.itinerary.TravelDetailsDTO;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
-import com.google.maps.errors.ApiException;
 import com.google.maps.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -36,60 +34,79 @@ public class RoutesServiceImpl {
 
     private static ExecutorService executorService;
 
+//    private static final Map<String, TravelDetailsDTO> localTravelDetailsCache = new ConcurrentHashMap<>();
+
     @PostConstruct
     public void init() {
         RoutesServiceImpl.geoApiContext = injectedGeoApiContext;
         RoutesServiceImpl.executorService = Executors.newFixedThreadPool(executorSize);
     }
 
-    public static List<TravelDetailsDTO> getBasicRoute(String origin, String destination, String travelMode) {
-        log.info("Calculating basic route from {} to {} via {}", origin, destination, travelMode);
-        return CompletableFuture.supplyAsync(() -> DirectionsApi.newRequest(geoApiContext)
-                        .origin(origin)
-                        .destination(destination)
-                        .mode(TravelMode.valueOf(travelMode.toUpperCase())), executorService)
-                .thenComposeAsync(request ->
-                        executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
-    }
-
-    public static List<TravelDetailsDTO> getFixedWaypointRoute(String origin, String destination, String fixedIntermediateWaypoints, String travelMode, String departureTime) {
-        log.info("Calculating fixed waypoint route from {} to {} via {} with waypoints: {}",
-                origin, destination, travelMode, fixedIntermediateWaypoints);
-
-        return CompletableFuture.supplyAsync(() -> {
-                    try {
-                        String[] intermediateWayPointArr = fixedIntermediateWaypoints.split(",");
-
-                        return DirectionsApi.newRequest(geoApiContext)
-                                .origin(origin)
-                                .destination(destination)
-                                .mode(TravelMode.valueOf(travelMode.toUpperCase()))
-                                .waypoints(intermediateWayPointArr)
-                                .optimizeWaypoints(true)
-                                .departureTime(parseDepartureTime(departureTime))
-                                .trafficModel(TrafficModel.OPTIMISTIC);
-                    } catch (Exception e) {
-                        log.error("Error computing routes for fixed waypoint: {}", e.getMessage());
-                        return null;
-                    }
-                }, executorService)
-                .thenComposeAsync(request ->
-                        executeRouteRequest(request, TravelMode.valueOf(travelMode))).join();
-    }
+//    public static List<TravelDetailsDTO> getBasicRoute(String origin, String destination, String travelMode) {
+//        log.info("Calculating basic route from {} to {} via {}", origin, destination, travelMode);
+//        return CompletableFuture.supplyAsync(() -> DirectionsApi.newRequest(geoApiContext)
+//                        .origin(origin)
+//                        .destination(destination)
+//                        .mode(TravelMode.valueOf(travelMode.toUpperCase())), executorService)
+//                .thenComposeAsync(request ->
+//                        executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
+//    }
+//
+//    public static List<TravelDetailsDTO> getFixedWaypointRoute(String origin, String destination, String fixedIntermediateWaypoints, String travelMode, String departureTime) {
+//        log.info("Calculating fixed waypoint route from {} to {} via {} with waypoints: {}",
+//                origin, destination, travelMode, fixedIntermediateWaypoints);
+//
+//        return CompletableFuture.supplyAsync(() -> {
+//                    try {
+//                        String[] intermediateWayPointArr = fixedIntermediateWaypoints.split(",");
+//
+//                        return DirectionsApi.newRequest(geoApiContext)
+//                                .origin(origin)
+//                                .destination(destination)
+//                                .mode(TravelMode.valueOf(travelMode.toUpperCase()))
+//                                .waypoints(intermediateWayPointArr)
+//                                .optimizeWaypoints(true)
+//                                .departureTime(parseDepartureTime(departureTime))
+//                                .trafficModel(TrafficModel.OPTIMISTIC);
+//                    } catch (Exception e) {
+//                        log.error("Error computing routes for fixed waypoint: {}", e.getMessage());
+//                        return null;
+//                    }
+//                }, executorService)
+//                .thenComposeAsync(request ->
+//                        executeRouteRequest(request, TravelMode.valueOf(travelMode))).join();
+//    }
 
     public static List<TravelDetailsDTO> getOptimizedWaypointRoute(String origin, String destination, String intermediateWaypoints, String travelMode, String departureTime) {
         log.info("Calculating optimized waypoint route from {} to {} via {} with waypoints: {}",
                 origin, destination, travelMode, intermediateWaypoints);
 
+        String prefix = "place_id:";
+        if (!origin.startsWith(prefix)) {
+            origin = prefix + origin;
+        }
+
+        if (!destination.startsWith(prefix)) {
+            destination = prefix + destination;
+        }
+
+        String[] intermediateWayPointArr = intermediateWaypoints.split(",");
+        for (int i=0; i<intermediateWayPointArr.length; i++)  {
+            if (!intermediateWayPointArr[i].startsWith(prefix)) {
+                intermediateWayPointArr[i] = prefix + intermediateWayPointArr[i];
+            }
+        }
+
+        final String finalOrigin = origin;
+        final String finalDestination = destination;
+        final String[] finalIntermediateWayPointArr = intermediateWayPointArr;
         return CompletableFuture.supplyAsync(() -> {
                     try {
-                        String[] intermediateWayPointArr = intermediateWaypoints.split(",");
-
                         return DirectionsApi.newRequest(geoApiContext)
-                                .origin(origin)
-                                .destination(destination)
+                                .origin(finalOrigin)
+                                .destination(finalDestination)
                                 .mode(TravelMode.valueOf(travelMode.toUpperCase()))
-                                .waypoints(intermediateWayPointArr)
+                                .waypoints(finalIntermediateWayPointArr)
                                 .optimizeWaypoints(true)
                                 .departureTime(parseDepartureTime(departureTime))
                                 .trafficModel(TrafficModel.BEST_GUESS);
@@ -103,44 +120,61 @@ public class RoutesServiceImpl {
 
     }
 
-    public static List<TravelDetailsDTO> getRouteWithAvoidance(String origin, String destination, String travelMode, boolean avoidTolls, boolean avoidHighways, boolean avoidFerries, String departureTime) {
-        log.info("Calculating route with avoidance from {} to {} via {} with avoidTolls: {}, avoidHighway: {}, avoidFerries: {}",
-                origin, destination, travelMode, avoidTolls, avoidHighways, avoidFerries);
+//    public static List<TravelDetailsDTO> getRouteWithAvoidance(String origin, String destination, String travelMode, boolean avoidTolls, boolean avoidHighways, boolean avoidFerries, String departureTime) {
+//        log.info("Calculating route with avoidance from {} to {} via {} with avoidTolls: {}, avoidHighway: {}, avoidFerries: {}",
+//                origin, destination, travelMode, avoidTolls, avoidHighways, avoidFerries);
+//
+//        return CompletableFuture.supplyAsync(() -> {
+//                    DirectionsApiRequest request = DirectionsApi.newRequest(geoApiContext)
+//                            .origin(origin)
+//                            .destination(destination)
+//                            .mode(TravelMode.valueOf(travelMode.toUpperCase()))
+//                            .optimizeWaypoints(true)
+//                            .departureTime(parseDepartureTime(departureTime))
+//                            .trafficModel(TrafficModel.BEST_GUESS);
+//
+//                    if (avoidTolls) {
+//                        request.avoid(DirectionsApi.RouteRestriction.TOLLS);
+//                    }
+//
+//                    if (avoidHighways) {
+//                        request.avoid(DirectionsApi.RouteRestriction.HIGHWAYS);
+//                    }
+//
+//                    if (avoidFerries) {
+//                        request.avoid(DirectionsApi.RouteRestriction.FERRIES);
+//                    }
+//
+//                    return request;
+//                }, executorService)
+//                .thenComposeAsync(request ->
+//                        executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
+//    }
 
-        return CompletableFuture.supplyAsync(() -> {
-                    DirectionsApiRequest request = DirectionsApi.newRequest(geoApiContext)
-                            .origin(origin)
-                            .destination(destination)
-                            .mode(TravelMode.valueOf(travelMode.toUpperCase()))
-                            .optimizeWaypoints(true)
-                            .departureTime(parseDepartureTime(departureTime))
-                            .trafficModel(TrafficModel.BEST_GUESS);
-
-                    if (avoidTolls) {
-                        request.avoid(DirectionsApi.RouteRestriction.TOLLS);
-                    }
-
-                    if (avoidHighways) {
-                        request.avoid(DirectionsApi.RouteRestriction.HIGHWAYS);
-                    }
-
-                    if (avoidFerries) {
-                        request.avoid(DirectionsApi.RouteRestriction.FERRIES);
-                    }
-
-                    return request;
-                }, executorService)
-                .thenComposeAsync(request ->
-                        executeRouteRequest(request, TravelMode.valueOf(travelMode.toUpperCase()))).join();
-    }
-
-    // In src/main/java/com/backend/wanderverse_server/service/impl/RoutesServiceImpl.java
+//    public static TravelDetailsDTO getFullTravelDetailsForUser(String id) {
+//        if (id == null || i.isEmpty()) {
+//            log.error("Invalid place ID");
+//            return null;
+//        } else {
+//            if (!localPlaceDetailsCache.containsKey(placeId)) {
+//                try {
+//                    localPlaceDetailsCache.put(placeId, getPlaceDetailsAsync(placeId).join());
+//                } catch (Exception e) {
+//                    log.error("Cannot get location from placeId: {}", placeId);
+//                    return null;
+//                }
+//            }
+//            return localPlaceDetailsCache.get(placeId);
+//        }
+//    }
 
     private static Instant parseDepartureTime(String departureTime) {
         try {
             String formattedDepartureTime = getFormattedDepartureTime(departureTime);
             log.info("Formatted departureTime for parsing: {}", formattedDepartureTime);
-            return Instant.parse(formattedDepartureTime);
+            return Instant.parse(formattedDepartureTime).isBefore(Instant.now())
+                    ? Instant.now()
+                    : Instant.parse(formattedDepartureTime);
         } catch (DateTimeParseException e) {
             log.warn("Invalid departureTime format: {}. Falling back to current time + 5 minutes.", departureTime);
             // Fallback to a safe default
@@ -182,17 +216,26 @@ public class RoutesServiceImpl {
                 log.info("Route found! Origin {}", origin);
                 log.info("Route found! Destination {}", destination);
 
-                return Arrays.stream(bestRoute.legs).map(leg -> TravelDetailsDTO.builder()
-                        .origin(leg.startAddress)
-                        .destination(leg.endAddress)
-                        .durationMinutes(leg.duration.inSeconds / 60)
-                        .distanceKm((double) leg.distance.inMeters / 1000)
-                        .mode(travelMode)
-                        .build()
+                 return Arrays.stream(bestRoute.legs).map(leg -> {
+                     TravelDetailsDTO travelDetails = TravelDetailsDTO.builder()
+                             .origin(leg.startAddress)
+                             .destination(leg.endAddress)
+                             .durationMinutes(leg.duration.inSeconds / 60)
+                             .distanceKm((double) leg.distance.inMeters / 1000)
+                             .mode(travelMode)
+                             .build();
+
+                     return travelDetails;
+
+//                     localTravelDetailsCache.put(travelDetails.getOrigin() + "_" + travelDetails.getDestination(), travelDetails);
+//                     return LLM_TravelDetailsDTO.builder()
+//                             .id(travelDetails.getOrigin() + "_" + travelDetails.getDestination())
+//                             .build();
+                 }
                 ).toList();
             } catch (Exception e) {
-                log.error("Error computing route: {}", e.getMessage());
-                e.printStackTrace();
+                log.error("Error computing route: {}", e.getMessage(), e);
+//                e.printStackTrace();
                 throw new RuntimeException("Error computing route: " + e.getMessage());
             }
         }, executorService);

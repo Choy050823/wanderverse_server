@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class TravelDetailsDTO {
-    private Long id;
+//    private String id;
     private String origin;
     private String destination;
     private TravelMode mode;

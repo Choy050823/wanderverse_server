@@ -1,5 +1,6 @@
 package com.backend.wanderverse_server.model.dto.itinerary;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.maps.PlaceDetailsRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+//@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 public class LocationDetailsDTO {
     private String placeId;
     private String name;

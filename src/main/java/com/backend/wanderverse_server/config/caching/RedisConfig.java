@@ -22,7 +22,7 @@ import java.time.Duration;
 
 @Configuration
 public class RedisConfig {
-    @Bean
+    @Bean(name = "redisObjectMapper")
     public ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -47,7 +47,7 @@ public class RedisConfig {
         return RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(cacheConfiguration(redisObjectMapper))
                 .withCacheConfiguration("places", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
-                .withCacheConfiguration("routes", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
+//                .withCacheConfiguration("routes", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
                 .withCacheConfiguration("textSearchPlaces", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
                 .withCacheConfiguration("nearbySearchPlaces", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
                 .withCacheConfiguration("photos", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LLM_LocationDetailsDTO {
     private String placeId;
-//    private String name;
+    private String name;
 //    private String editorialSummary;
 //    private String formattedAddress;
 //    private double rating;

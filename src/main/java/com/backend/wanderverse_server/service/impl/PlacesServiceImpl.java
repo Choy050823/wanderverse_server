@@ -4,11 +4,15 @@ import com.backend.wanderverse_server.model.CustomMultipartFile;
 import com.backend.wanderverse_server.model.dto.itinerary.LLM_LocationDetailsDTO;
 import com.backend.wanderverse_server.model.dto.itinerary.LocationDetailsDTO;
 import com.backend.wanderverse_server.service.StorageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.maps.*;
 import com.google.maps.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -30,6 +34,12 @@ public class PlacesServiceImpl {
     @Autowired
     private StorageService injectedStorageService;
 
+    @Autowired
+    private CacheManager injectedCacheManager;
+
+    @Autowired
+    private ObjectMapper redisObjectMapper;
+
     @Value("${google.maps.platform.api.key}")
     private String googleMapsApiKey;
 
@@ -42,11 +52,17 @@ public class PlacesServiceImpl {
 
     private static StorageService storageService;
 
+    private static CacheManager cacheManager;
+
     private static ExecutorService executorService;
+
+    private static ObjectMapper serviceRedisObjectMapper;
 
     private static final int maxWidth = 1080;
 
     private static final int maxHeight = 1080;
+
+    private static final String PLACES_CACHE = "places";
 
     private static final Map<String, LocationDetailsDTO> localPlaceDetailsCache = new ConcurrentHashMap<>();
 
@@ -56,13 +72,14 @@ public class PlacesServiceImpl {
         PlacesServiceImpl.placesDetailsFieldMasks = injectedPlacesDetailsFieldMasks;
         PlacesServiceImpl.storageService = injectedStorageService;
         PlacesServiceImpl.executorService = Executors.newFixedThreadPool(executorSize);
+        PlacesServiceImpl.cacheManager = injectedCacheManager;
+        PlacesServiceImpl.serviceRedisObjectMapper = redisObjectMapper;
     }
 
     public static LLM_LocationDetailsDTO textSearch(String query, String placeType) {
         log.info("Performing text search for query: {} with type: {}", query, placeType);
         if (query == null || query.isEmpty()) {
             log.warn("Query for textSearch is empty");
-//            return CompletableFuture.completedFuture(null);
             return null;
         }
 
@@ -92,15 +109,14 @@ public class PlacesServiceImpl {
 
                 return LLM_LocationDetailsDTO.builder()
                         .placeId(locationDetails.getPlaceId())
-//                        .name(locationDetails.getName())
+                        .name(locationDetails.getName())
 //                        .editorialSummary(locationDetails.getEditorialSummary())
 //                        .formattedAddress(locationDetails.getFormattedAddress())
 //                        .rating(locationDetails.getRating())
                         .build();
 
             } catch (Exception e) {
-                log.error("Unexpected error occurred during text search: {}", e.getMessage());
-                e.printStackTrace();
+                log.error("Unexpected error occurred during text search: {}", e.getMessage(), e);
                 return null;
             }
         }, executorService).join();
@@ -139,15 +155,14 @@ public class PlacesServiceImpl {
                         .filter(Objects::nonNull)
                         .map(locationDetails -> LLM_LocationDetailsDTO.builder()
                                 .placeId(locationDetails.getPlaceId())
-//                                .name(locationDetails.getName())
+                                .name(locationDetails.getName())
 //                                .editorialSummary(locationDetails.getEditorialSummary())
 //                                .formattedAddress(locationDetails.getFormattedAddress())
 //                                .rating(locationDetails.getRating())
                                 .build())
                         .toList();
             } catch (Exception e) {
-                log.error("Unexpected error occurred during nearby search: {}", e.getMessage());
-                e.printStackTrace();
+                log.error("Unexpected error occurred during nearby search: {}", e.getMessage(), e);
                 return null;
             }
         }, executorService).join();
@@ -158,23 +173,83 @@ public class PlacesServiceImpl {
             log.error("Invalid place ID");
             return null;
         } else {
-            if (!localPlaceDetailsCache.containsKey(placeId)) {
-                try {
-                    localPlaceDetailsCache.put(placeId, getPlaceDetailsAsync(placeId).join());
-                } catch (Exception e) {
-                    log.error("Cannot get location from placeId: {}", placeId);
-                    return null;
+            if (placeId.startsWith("place_id:")) {
+                placeId = placeId.substring(9);
+            }
+
+            // Concurrent HashMap Method for CACHING
+//            if (!localPlaceDetailsCache.containsKey(placeId)) {
+//                try {
+//                    localPlaceDetailsCache.put(placeId, getPlaceDetailsAsync(placeId).join());
+//                } catch (Exception e) {
+//                    log.error("Cannot get location from placeId: {}", placeId);
+//                    return null;
+//                }
+//            }
+//            return localPlaceDetailsCache.get(placeId);
+
+
+            // Redis Method of CACHING
+            Cache placesCache = cacheManager.getCache(PLACES_CACHE);
+            if (placesCache == null) {
+                log.error("Error finding places cache!");
+            } else {
+                Cache.ValueWrapper wrapper = placesCache.get(placeId);
+                if (wrapper != null) {
+                    Object cachedValue = wrapper.get();
+                    if (cachedValue instanceof LocationDetailsDTO) {
+                        log.info("Returning place details from Redis cache for placeId: {}", placeId);
+                        return (LocationDetailsDTO) cachedValue;
+                    } else if (cachedValue instanceof LinkedHashMap) {
+                        try {
+                            LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
+                            log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
+                            return locationDetails;
+                        } catch (IllegalArgumentException e) {
+                            log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
+                            placesCache.evict(placeId);
+                        }
+                    }
                 }
             }
-            return localPlaceDetailsCache.get(placeId);
+
+            return getPlaceDetailsAsync(placeId).join();
         }
     }
 
+
     private static CompletableFuture<LocationDetailsDTO> getPlaceDetailsAsync(String placeId) {
-        if (localPlaceDetailsCache.containsKey(placeId)) {
-            log.info("Returning place details from cache for placeId: {}", placeId);
-            return CompletableFuture.completedFuture(localPlaceDetailsCache.get(placeId));
+        // Concurrent HashMap METHOD for CACHING
+//        if (localPlaceDetailsCache.containsKey(placeId)) {
+//            log.info("Returning place details from cache for placeId: {}", placeId);
+//            return CompletableFuture.completedFuture(localPlaceDetailsCache.get(placeId));
+//        }
+
+        // Redis Method for CACHING
+        Cache placesCache = cacheManager.getCache(PLACES_CACHE);
+        if (placesCache == null) {
+            log.error("Error finding places cache!");
+        } else {
+            Cache.ValueWrapper wrapper = placesCache.get(placeId);
+            if (wrapper != null) {
+                Object cachedValue = wrapper.get();
+                if (cachedValue instanceof LocationDetailsDTO) {
+                    log.info("Returning place details from Redis cache for placeId: {}", placeId);
+                    return CompletableFuture.completedFuture((LocationDetailsDTO) cachedValue);
+                } else if (cachedValue instanceof LinkedHashMap) {
+                    try {
+                        LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
+                        log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
+                        return CompletableFuture.completedFuture(locationDetails);
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
+                        placesCache.evict(placeId);
+                    }
+                }
+            }
         }
+
+        // Cannot find cache in redis, then write through from the database in Google Places API
         log.info("Starting to get place details for place Id: {}", placeId);
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -209,18 +284,27 @@ public class PlacesServiceImpl {
                         .phoneNumber(placeDetails.internationalPhoneNumber != null ? placeDetails.internationalPhoneNumber : "")
                         .locationUrl(placeDetails.url != null ? placeDetails.url.toString() : "")
                         .locationImageUrl(imageUrl)
-                        .openingHours(placeDetails.currentOpeningHours != null ? Arrays.asList(placeDetails.currentOpeningHours.weekdayText) : List.of())
+                        .openingHours(placeDetails.currentOpeningHours != null
+                                ? Arrays.asList(placeDetails.currentOpeningHours.weekdayText != null
+                                                        ? placeDetails.currentOpeningHours.weekdayText
+                                                        : new String[] {})
+                                : List.of())
                         .build();
 
-                localPlaceDetailsCache.put(placeDetails.placeId, fullLocationDetails);
-                log.info("Uploaded place details with place Id: {} to cache: {}",
-                        placeDetails.placeId,
-                        localPlaceDetailsCache.get(placeDetails.placeId).getName() + " " + localPlaceDetailsCache.get(placeDetails.placeId).getWebsite());
+                // Concurrent HashMap CACHING
+//                localPlaceDetailsCache.put(placeDetails.placeId, fullLocationDetails);
+
+                // Redis CACHING
+                if (placesCache != null) {
+                    placesCache.put(placeDetails.placeId, fullLocationDetails);
+                    log.info("Uploaded place details with place Id: {} to Redis cache: {}",
+                            placeDetails.placeId,
+                            fullLocationDetails.getName() + " " + fullLocationDetails.getWebsite());
+                }
 
                 return fullLocationDetails;
             } catch (Exception e) {
-                log.error("Error getting Place Details with placeId {} : {}", placeId, e.getMessage());
-                e.printStackTrace();
+                log.error("Error getting Place Details with placeId {} : {}", placeId, e.getMessage(), e);
                 throw new RuntimeException("Error getting Place Details: " + e.getMessage());
             }
         }, executorService);
