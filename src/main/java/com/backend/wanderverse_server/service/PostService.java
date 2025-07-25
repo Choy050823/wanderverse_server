@@ -5,6 +5,8 @@ import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface PostService {
     Page<PostEntity> findAll(Pageable pageable);
 
@@ -21,4 +23,6 @@ public interface PostService {
     PostEntity fullUpdatePost(PostEntity post);
 
     boolean isExists(long id);
+
+    Optional<PostEntity> getPostById(Long postId);
 }
