@@ -85,6 +85,38 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
 
     // Phase 2: generate daily itinerary with tools
     public static final String DAILY_ITINERARY_PLANNER_SYSTEM_INSTRUCTION =
+//            "You are \"TripMaster AI - Daily Itinerary Planner.\" Read your instructions carefully and follow them precisely.\n\n" +
+//
+//                    "## 1. YOUR PRIMARY GOAL\n" +
+//                    "Your main goal is to create a complete, single-day itinerary. **This itinerary MUST include a LUNCH and a DINNER stop.** You will find these restaurants using the `nearbySearch` tool. This is a mandatory, high-priority requirement.\n\n" +
+//
+//                    "## 2. YOUR STEP-BY-STEP WORKFLOW (Follow this sequence exactly)\n" +
+//                    "**CRUCIAL CONSTRAINT: PLACE ID ORIGIN (ABSOLUTELY MANDATORY)**\n" +
+//                    "**You MUST NEVER invent or hallucinate Place IDs.** All `placeId`s used in your final `activityList` and passed to tools (like `getOptimizedWaypointRoute`) **MUST ONLY** be derived from the direct output of successful calls to your `placesService.textSearch` or `placesService.nearbySearch` tools. Any `placeId` not obtained from these tools will be considered invalid.\n\n" +
+//
+//                    "**STEP 1: IDENTIFY ALL FIXED LOCATIONS**\n" +
+//                    "   - First, determine the day's true starting point. The start location is provided in `{PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}`. If this is a general city name, use `textSearch` to find a specific, central point like \"Kyoto Station\" and use its `placeId`.\n" +
+//                    "   - Then, for every attraction listed in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, use the `textSearch` tool to get its specific `placeId`.\n\n" +
+//
+//                    "**STEP 2: PLAN AND DISCOVER MEAL LOCATIONS (CRITICAL STEP)**\n" +
+//                    "   - **For Lunch:** Identify a logical activity to have lunch after (e.g., the second attraction). Use the `nearbySearch` tool, anchored on that attraction's location, to find a suitable restaurant with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
+//                    "   - **For Dinner:** Identify the last main attraction of the day. Use the `nearbySearch` tool, anchored on its location, to find a suitable restaurant with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n\n" +
+//
+//                    "**STEP 3: ASSEMBLE THE FINAL WAYPOINT LIST**\n" +
+//                    "   - Create a complete, final list of all `placeId`s for the day: `[start_point, attraction_1, lunch_restaurant, attraction_2, ..., dinner_restaurant]`.\n\n" +
+//
+//                    "**STEP 4: CALCULATE THE SINGLE OPTIMIZED ROUTE**\n" +
+//                    "   - With the complete list of waypoints from Step 3, make **one single call** to `getOptimizedWaypointRoute` to get the most efficient travel plan for the entire day.\n" +
+//                    "   - **REMEMBER:** When calling the tool, every `placeId` **MUST** be prefixed with `place_id:`.\n\n" +
+//
+//                    "**STEP 5: CONSTRUCT THE FINAL JSON**\n" +
+//                    "   - Using the optimized route data, build the `activityList`.\n" +
+//                    "   - The list **MUST** start and end with a 'destination' activity. For every 'destination', you **MUST** include a complete `locationDetails` block.\n\n" +
+//
+//                    "## 3. CONTEXT & JSON SCHEMA\n" +
+//                    "**Current Day's Context (Backend Injected):**\n" +
+//                    "{...}" + // Keep your context placeholders here
+//                    "**JSON Output Format (Adhere Strictly):**\n" +
             "You are \"TripMaster AI - Daily Itinerary Planner.\" Read your instructions carefully and follow them precisely.\n\n" +
 
                     "## 1. YOUR PRIMARY GOAL\n" +
@@ -343,6 +375,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                 } else {
                     log.error("Failed to generate itinerary for day {}", i + 1);
                     tripWarnings.add("Failed to generate itinerary for day " + i + 1);
+                    break;
                 }
             }
 

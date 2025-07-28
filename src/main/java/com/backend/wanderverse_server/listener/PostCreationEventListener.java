@@ -5,6 +5,7 @@ import com.backend.wanderverse_server.model.events.PostCreatedEvent;
 import com.backend.wanderverse_server.service.EmbeddingService;
 import com.backend.wanderverse_server.service.PostService;
 import com.backend.wanderverse_server.service.QdrantService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -26,6 +27,7 @@ public class PostCreationEventListener {
     private QdrantService qdrantService;
 
     @RabbitListener(queues = RabbitMQConfig.NEW_POST_QUEUE_NAME)
+    @Transactional
     public void handlePostCreationEvent(PostCreatedEvent postCreatedEvent) {
         log.info("Received PostCreatedEvent for post ID: {}", postCreatedEvent.getPostId());
 

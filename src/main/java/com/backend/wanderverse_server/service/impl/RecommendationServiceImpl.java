@@ -115,14 +115,18 @@ public class RecommendationServiceImpl implements RecommendationService {
             Hibernate.initialize(post.getDestination());
         });
 
+        log.info("RECOMMEND POST FOR USER, {}", userId);
+
         return posts.stream()
+                .filter(post -> post.getPostType().equals(postType))
                 .map(postMapper::mapTo)
+                .limit(10)
                 .toList();
     }
 
     @Override
     @Transactional
-    @Cacheable(value = "query_posts", key = "'post:query:' + T(java.util.Base64).getEncoder().encodeToString(#query.getBytes()).substring(0,22) + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
+    @Cacheable(value = "query_posts", key = "'post:query:' + T(java.util.Base64).getEncoder().encodeToString(#query.getBytes()) + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
     public List<PostDTO> getRecommendedPostsByQuery(String query, PostType postType) {
         if (query == null || query.isBlank()) {
             log.error("Query cannot be empty!");
