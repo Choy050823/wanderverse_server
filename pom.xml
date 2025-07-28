@@ -47,6 +47,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -141,6 +145,57 @@
 			<artifactId>google-cloud-aiplatform</artifactId>
 			<version>3.67.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.genai</groupId>
+			<artifactId>google-genai</artifactId>
+			<version>1.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-core</artifactId>
+			<version>1.73.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.qdrant</groupId>
+			<artifactId>client</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.maps</groupId>
+			<artifactId>google-maps-services</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.19.1</version> <!-- Use the latest compatible version -->
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-hibernate5-jakarta</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -149,6 +204,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>

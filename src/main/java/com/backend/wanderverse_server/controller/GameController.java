@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/game")
 public class GameController {
@@ -13,16 +15,30 @@ public class GameController {
     private GameService gameService;
 
     @GetMapping(path = "/points")
-    public ResponseEntity<Integer> getGamePoints(@RequestParam String userId) {
-        Integer gamePoint = gameService.getGamePoints(Long.parseLong(userId));
+    public ResponseEntity<Integer> getGamePoints(@RequestParam Long userId) {
+        Integer gamePoint = gameService.getGamePoints(userId);
         return gamePoint != null ? ResponseEntity.ok().body(gamePoint)
                                  : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @PostMapping(path = "/points")
-    public ResponseEntity<Integer> addGamePoints(@RequestParam String userId, @RequestParam String newGamePoint) {
-        Integer gamePoint = gameService.addGamePoints(Long.parseLong(userId), Integer.parseInt(newGamePoint));
+    public ResponseEntity<Integer> addGamePoints(@RequestParam Long userId, @RequestParam Integer newGamePoint) {
+        Integer gamePoint = gameService.addGamePoints(userId, newGamePoint);
         return gamePoint != null ? ResponseEntity.status(HttpStatus.CREATED).body(gamePoint)
                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+    }
+
+    @GetMapping(path = "/badges")
+    public ResponseEntity<List<String>> getUserBadges(@RequestParam Long userId) {
+        return ResponseEntity.ok().body(gameService.getUserAchievementBadgesImageUrl(userId));
+    }
+
+    @PostMapping(path = "/badges")
+    public ResponseEntity<String> achievementUnlocked(@RequestParam Long userId, @RequestParam String achievementName) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(gameService.achievementUnlocked(userId, achievementName));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

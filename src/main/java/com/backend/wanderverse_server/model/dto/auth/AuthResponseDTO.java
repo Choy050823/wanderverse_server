@@ -1,5 +1,6 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.auth;
 
+import com.backend.wanderverse_server.model.dto.post.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

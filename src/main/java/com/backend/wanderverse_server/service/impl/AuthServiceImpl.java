@@ -1,10 +1,10 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.dto.AuthResponseDTO;
-import com.backend.wanderverse_server.model.dto.LoginRequestDTO;
-import com.backend.wanderverse_server.model.dto.SignUpRequestDTO;
-import com.backend.wanderverse_server.model.dto.UserDTO;
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.dto.auth.AuthResponseDTO;
+import com.backend.wanderverse_server.model.dto.auth.LoginRequestDTO;
+import com.backend.wanderverse_server.model.dto.auth.SignUpRequestDTO;
+import com.backend.wanderverse_server.model.dto.post.UserDTO;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import com.backend.wanderverse_server.model.mappers.Mapper;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.security.JwtUtil;
@@ -96,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
     public Optional<AuthResponseDTO> register(SignUpRequestDTO signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             log.error("User exists");
-            return Optional.empty();
+            throw new RuntimeException("User Already Exists!");
         }
 
         try {

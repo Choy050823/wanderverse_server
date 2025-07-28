@@ -71,7 +71,8 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
-    private String generateFileUrl(String fileName) {
+    @Override
+    public String generateFileUrl(String fileName) {
         if (!endpoint.isEmpty()) {
             // MinIO URL
             return String.format("%s/%s/%s", endpoint, bucketName, fileName);

@@ -1,8 +1,8 @@
 package com.backend.wanderverse_server.controller;
 
-import com.backend.wanderverse_server.model.dto.AuthResponseDTO;
-import com.backend.wanderverse_server.model.dto.LoginRequestDTO;
-import com.backend.wanderverse_server.model.dto.SignUpRequestDTO;
+import com.backend.wanderverse_server.model.dto.auth.AuthResponseDTO;
+import com.backend.wanderverse_server.model.dto.auth.LoginRequestDTO;
+import com.backend.wanderverse_server.model.dto.auth.SignUpRequestDTO;
 import com.backend.wanderverse_server.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,8 +29,13 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
-        return authService.register(signUpRequest)
-                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+        try {
+            return authService.register(signUpRequest)
+                    .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
+                    .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
     }
 }

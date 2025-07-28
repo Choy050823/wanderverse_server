@@ -1,14 +1,18 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.dto.CreatePostRequestDTO;
-import com.backend.wanderverse_server.model.entity.DestinationEntity;
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.PostType;
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.dto.post.CreatePostRequestDTO;
+import com.backend.wanderverse_server.model.entity.post.DestinationEntity;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostType;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
+import com.backend.wanderverse_server.model.events.PostCreatedEvent;
 import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.PostService;
+import com.backend.wanderverse_server.service.RabbitMQProducer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +22,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Optional;
 
 @Service
+@Slf4j
 public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
@@ -29,6 +35,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private DestinationRepository destinationRepository;
+
+    @Autowired
+    private RabbitMQProducer rabbitMQProducer;
 
     @Override
     public Page<PostEntity> findAllSharingPosts(Pageable pageable) {
@@ -105,6 +114,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @CachePut(cacheNames = "posts", keyGenerator = "cacheKeyGenerator")
     public PostEntity createPost(CreatePostRequestDTO post) {
         try {
             // Validate and parse creatorId
@@ -131,7 +141,19 @@ public class PostServiceImpl implements PostService {
                     .commentsCount(0)
                     .build();
 
-            return postRepository.save(postEntity);
+            PostEntity savedPostEntity = postRepository.save(postEntity);
+
+            log.info("Post saved to DB with ID: {}", savedPostEntity.getId());
+            rabbitMQProducer.sendPostCreatedEvent(
+                    PostCreatedEvent.builder()
+                            .postId(savedPostEntity.getId())
+                            .creatorId(savedPostEntity.getCreator().getId())
+                            .createdAt(savedPostEntity.getCreatedAt())
+                            .build()
+            );
+            log.info("Published PostCreatedEvent for post ID: {}", savedPostEntity.getId());
+
+            return savedPostEntity;
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid ID format: " + e.getMessage());
         }
@@ -154,5 +176,10 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostEntity fullUpdatePost(PostEntity post) {
         return postRepository.save(post);
+    }
+
+    @Override
+    public Optional<PostEntity> getPostById(Long postId) {
+        return postRepository.findById(postId);
     }
 }

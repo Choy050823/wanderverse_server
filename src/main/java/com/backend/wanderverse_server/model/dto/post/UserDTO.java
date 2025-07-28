@@ -1,12 +1,12 @@
-package com.backend.wanderverse_server.model.dto;
+package com.backend.wanderverse_server.model.dto.post;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,4 +22,5 @@ public class UserDTO {
     private int gamePoints;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> badgesUrls;
 }

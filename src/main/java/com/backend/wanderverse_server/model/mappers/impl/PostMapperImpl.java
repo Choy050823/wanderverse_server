@@ -1,7 +1,7 @@
 package com.backend.wanderverse_server.model.mappers.impl;
 
-import com.backend.wanderverse_server.model.dto.PostDTO;
-import com.backend.wanderverse_server.model.entity.PostEntity;
+import com.backend.wanderverse_server.model.dto.post.PostDTO;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import com.backend.wanderverse_server.model.mappers.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

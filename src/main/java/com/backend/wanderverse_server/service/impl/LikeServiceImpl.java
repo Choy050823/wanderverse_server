@@ -1,16 +1,20 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.entity.LikeEntity;
-import com.backend.wanderverse_server.model.entity.PostEntity;
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.entity.post.LikeEntity;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import com.backend.wanderverse_server.repository.LikeRepository;
 import com.backend.wanderverse_server.repository.PostRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.LikeService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
+@Slf4j
 public class LikeServiceImpl implements LikeService {
     @Autowired
     private LikeRepository likeRepository;
@@ -60,5 +64,17 @@ public class LikeServiceImpl implements LikeService {
         post.setLikesCount(post.getLikesCount() - 1);
         postRepository.save(post);
         likeRepository.delete(likeRepository.findLikeWithPostAndUser(postId, userId));
+    }
+
+    @Override
+    public List<Long> getUserLikedPostByUserId(Long userId) {
+        List<LikeEntity> likes = likeRepository.findLikedPostWithUserId(userId);
+
+        if (likes == null) {
+            log.warn("User have not liked any posts yet!");
+            return List.of();
+        }
+
+        return likes.stream().map(like -> like.getPost().getId()).toList();
     }
 }

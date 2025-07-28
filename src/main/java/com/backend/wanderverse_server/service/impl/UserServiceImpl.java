@@ -1,6 +1,6 @@
 package com.backend.wanderverse_server.service.impl;
 
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

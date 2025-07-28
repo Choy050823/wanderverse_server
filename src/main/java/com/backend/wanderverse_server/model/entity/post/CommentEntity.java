@@ -1,5 +1,6 @@
-package com.backend.wanderverse_server.model.entity;
+package com.backend.wanderverse_server.model.entity.post;
 
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +14,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "likes")
-public class LikeEntity {
+@Table(name = "comments")
+public class CommentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column(nullable = false)
+    private String content;
 
     @ManyToOne
     @JoinColumn(name = "postId")
@@ -27,6 +31,10 @@ public class LikeEntity {
     @ManyToOne
     @JoinColumn(name = "userId")
     private UserEntity user;
+
+    @ManyToOne
+    @JoinColumn(name = "parentCommentId")
+    private CommentEntity parentComment;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

@@ -1,6 +1,6 @@
 package com.backend.wanderverse_server.repository;
 
-import com.backend.wanderverse_server.model.entity.PostEntity;
+import com.backend.wanderverse_server.model.entity.post.PostEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

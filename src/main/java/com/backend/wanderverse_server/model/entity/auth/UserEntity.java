@@ -1,4 +1,4 @@
-package com.backend.wanderverse_server.model.entity;
+package com.backend.wanderverse_server.model.entity.auth;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -37,6 +38,10 @@ public class UserEntity {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @ElementCollection
+    @CollectionTable(name = "achievement_badges", joinColumns = @JoinColumn(name = "user_id"))
+    private List<String> badgesUrls;
 
     @PrePersist
     protected void onCreate() {

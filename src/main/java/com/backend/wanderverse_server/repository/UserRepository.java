@@ -1,6 +1,6 @@
 package com.backend.wanderverse_server.repository;
 
-import com.backend.wanderverse_server.model.entity.UserEntity;
+import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
