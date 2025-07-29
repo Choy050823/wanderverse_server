@@ -93,7 +93,10 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     @Transactional
-    @Cacheable(value = "recommended_posts", key = "'post:rec:user:' + #userId + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
+    @Cacheable(value = "recommended_posts",
+            key = "'post:rec:user:' + #userId + ':type:' + (#postType != null ? #postType.name() : 'ALL')",
+            unless = "#result == null || #result.isEmpty()"
+    )
     public List<PostDTO> getRecommendedPostsForUser(Long userId, PostType postType) {
         log.info("Getting personalized recommendations for user: {}", userId);
         List<Long> interactedPostIdList = likeService.getUserLikedPostByUserId(userId);
@@ -126,7 +129,10 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     @Transactional
-    @Cacheable(value = "query_posts", key = "'post:query:' + T(java.util.Base64).getEncoder().encodeToString(#query.getBytes()) + ':type:' + (#postType != null ? #postType.name() : 'ALL')")
+    @Cacheable(value = "query_posts",
+            key = "'post:query:' + T(java.util.Base64).getEncoder().encodeToString(#query.getBytes()) + ':type:' + (#postType != null ? #postType.name() : 'ALL')",
+            unless = "#result == null || #result.isEmpty()"
+    )
     public List<PostDTO> getRecommendedPostsByQuery(String query, PostType postType) {
         if (query == null || query.isBlank()) {
             log.error("Query cannot be empty!");
