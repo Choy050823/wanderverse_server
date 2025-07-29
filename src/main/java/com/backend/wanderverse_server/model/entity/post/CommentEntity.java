@@ -8,9 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
@@ -44,6 +41,6 @@ public class CommentEntity {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = ZonedDateTime.now().withZoneSameInstant(ZoneId.of("Asia/Singapore")).toLocalDateTime();
+        createdAt = LocalDateTime.now();
     }
 }
