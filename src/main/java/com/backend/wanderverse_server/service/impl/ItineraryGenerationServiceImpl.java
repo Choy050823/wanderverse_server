@@ -247,7 +247,7 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
         try {
             // -------PHASE 1: GENERATE TRIP PLAN OVERVIEW-----------
             // No tools required for trip plan overview
-            log.info("Starting Phase 1 to generate overview");
+            log.info("NEW: Starting Phase 1 to generate overview");
             GenerateContentConfig overviewConfig =
                     GenerateContentConfig.builder()
                             .systemInstruction(Content.fromParts(Part.fromText(
