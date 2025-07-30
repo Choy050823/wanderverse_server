@@ -5,7 +5,6 @@ import com.backend.wanderverse_server.model.dto.itinerary.LLM_LocationDetailsDTO
 import com.backend.wanderverse_server.model.dto.itinerary.LocationDetailsDTO;
 import com.backend.wanderverse_server.service.StorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.maps.*;
 import com.google.maps.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -110,6 +109,8 @@ public class PlacesServiceImpl {
                 return LLM_LocationDetailsDTO.builder()
                         .placeId(locationDetails.getPlaceId())
                         .name(locationDetails.getName())
+                        .latitude(locationDetails.getLatitude())
+                        .longitude(locationDetails.getLongitude())
 //                        .editorialSummary(locationDetails.getEditorialSummary())
 //                        .formattedAddress(locationDetails.getFormattedAddress())
 //                        .rating(locationDetails.getRating())
@@ -156,6 +157,8 @@ public class PlacesServiceImpl {
                         .map(locationDetails -> LLM_LocationDetailsDTO.builder()
                                 .placeId(locationDetails.getPlaceId())
                                 .name(locationDetails.getName())
+                                .latitude(locationDetails.getLatitude())
+                                .longitude(locationDetails.getLongitude())
 //                                .editorialSummary(locationDetails.getEditorialSummary())
 //                                .formattedAddress(locationDetails.getFormattedAddress())
 //                                .rating(locationDetails.getRating())
@@ -279,6 +282,8 @@ public class PlacesServiceImpl {
                         .name(placeDetails.name)
                         .editorialSummary(placeDetails.editorialSummary != null ? placeDetails.editorialSummary.overview : "")
                         .formattedAddress(placeDetails.formattedAddress)
+                        .latitude(placeDetails.geometry.location.lat)
+                        .longitude(placeDetails.geometry.location.lng)
                         .rating(placeDetails.rating)
                         .website(placeDetails.website != null ? placeDetails.website.toString() : "")
                         .phoneNumber(placeDetails.internationalPhoneNumber != null ? placeDetails.internationalPhoneNumber : "")

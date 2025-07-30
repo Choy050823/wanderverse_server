@@ -31,7 +31,8 @@ public class ExternalAPIConfig {
                 PlaceDetailsRequest.FieldMask.WEBSITE,
                 PlaceDetailsRequest.FieldMask.INTERNATIONAL_PHONE_NUMBER,
                 PlaceDetailsRequest.FieldMask.URL,
-                PlaceDetailsRequest.FieldMask.PHOTOS
+                PlaceDetailsRequest.FieldMask.PHOTOS,
+                PlaceDetailsRequest.FieldMask.GEOMETRY_LOCATION
         );
     }
 }

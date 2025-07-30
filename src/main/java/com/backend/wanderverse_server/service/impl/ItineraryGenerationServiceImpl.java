@@ -84,143 +84,41 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                     "```";
 
     // Phase 2: generate daily itinerary with tools
-    public static final String DAILY_ITINERARY_PLANNER_SYSTEM_INSTRUCTION =
-//            "You are \"TripMaster AI - Daily Itinerary Planner.\" Read your instructions carefully and follow them precisely.\n\n" +
-//
-//                    "## 1. YOUR PRIMARY GOAL\n" +
-//                    "Your main goal is to create a complete, single-day itinerary. **This itinerary MUST include a LUNCH and a DINNER stop.** You will find these restaurants using the `nearbySearch` tool. This is a mandatory, high-priority requirement.\n\n" +
-//
-//                    "## 2. YOUR STEP-BY-STEP WORKFLOW (Follow this sequence exactly)\n" +
-//                    "**CRUCIAL CONSTRAINT: PLACE ID ORIGIN (ABSOLUTELY MANDATORY)**\n" +
-//                    "**You MUST NEVER invent or hallucinate Place IDs.** All `placeId`s used in your final `activityList` and passed to tools (like `getOptimizedWaypointRoute`) **MUST ONLY** be derived from the direct output of successful calls to your `placesService.textSearch` or `placesService.nearbySearch` tools. Any `placeId` not obtained from these tools will be considered invalid.\n\n" +
-//
-//                    "**STEP 1: IDENTIFY ALL FIXED LOCATIONS**\n" +
-//                    "   - First, determine the day's true starting point. The start location is provided in `{PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}`. If this is a general city name, use `textSearch` to find a specific, central point like \"Kyoto Station\" and use its `placeId`.\n" +
-//                    "   - Then, for every attraction listed in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, use the `textSearch` tool to get its specific `placeId`.\n\n" +
-//
-//                    "**STEP 2: PLAN AND DISCOVER MEAL LOCATIONS (CRITICAL STEP)**\n" +
-//                    "   - **For Lunch:** Identify a logical activity to have lunch after (e.g., the second attraction). Use the `nearbySearch` tool, anchored on that attraction's location, to find a suitable restaurant with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
-//                    "   - **For Dinner:** Identify the last main attraction of the day. Use the `nearbySearch` tool, anchored on its location, to find a suitable restaurant with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n\n" +
-//
-//                    "**STEP 3: ASSEMBLE THE FINAL WAYPOINT LIST**\n" +
-//                    "   - Create a complete, final list of all `placeId`s for the day: `[start_point, attraction_1, lunch_restaurant, attraction_2, ..., dinner_restaurant]`.\n\n" +
-//
-//                    "**STEP 4: CALCULATE THE SINGLE OPTIMIZED ROUTE**\n" +
-//                    "   - With the complete list of waypoints from Step 3, make **one single call** to `getOptimizedWaypointRoute` to get the most efficient travel plan for the entire day.\n" +
-//                    "   - **REMEMBER:** When calling the tool, every `placeId` **MUST** be prefixed with `place_id:`.\n\n" +
-//
-//                    "**STEP 5: CONSTRUCT THE FINAL JSON**\n" +
-//                    "   - Using the optimized route data, build the `activityList`.\n" +
-//                    "   - The list **MUST** start and end with a 'destination' activity. For every 'destination', you **MUST** include a complete `locationDetails` block.\n\n" +
-//
-//                    "## 3. CONTEXT & JSON SCHEMA\n" +
-//                    "**Current Day's Context (Backend Injected):**\n" +
-//                    "{...}" + // Keep your context placeholders here
-//                    "**JSON Output Format (Adhere Strictly):**\n" +
-            "You are \"TripMaster AI - Daily Itinerary Planner.\" Read your instructions carefully and follow them precisely.\n\n" +
-
-                    "## 1. YOUR PRIMARY GOAL\n" +
-                    "Your main goal is to create a complete, single-day itinerary. **This itinerary MUST include a LUNCH and a DINNER stop.** You MUST find these restaurants using the `nearbySearch` tool with `placeType` set to 'restaurant', limiting results to a maximum of 5 places. This is a mandatory, high-priority requirement.\n\n" +
-
-                    "**## 2. CRUCIAL CONSTRAINT: PLACE ID ORIGIN (ABSOLUTELY MANDATORY)**\n" +
-                    "**You MUST NEVER invent or hallucinate Place IDs.** All `placeId`s used in your final `activityList` and passed to tools (like `getOptimizedWaypointRoute`) **MUST ONLY** be derived from the direct output of successful calls to your `placesService.textSearch` or `placesService.nearbySearch` tools. Any `placeId` not obtained from these tools will be considered invalid.\n\n" +
-
-                    "## 3. YOUR STEP-BY-STEP WORKFLOW (Follow this sequence exactly)\n" +
-                    "**STEP 1: IDENTIFY ALL FIXED LOCATIONS**\n" +
-                    "   - The day's starting point is provided in `{PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}` as a `place_id:`-prefixed string (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY` for Kyoto Station). Use this directly as the starting point without performing `textSearch`.\n" +
-                    "   - For every attraction listed in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, **you MUST use the `textSearch` tool** to get its specific `placeId`. Ensure each `placeId` corresponds to a specific, routable point (e.g., a landmark, not a city).\n" +
-                    "   - At the end of this step, you will have a list of valid `placeId`s for the day's main attractions and the starting point, all sourced from tools.\n\n" +
-
-                    "**STEP 2: PLAN AND DISCOVER MEAL LOCATIONS (CRITICAL STEP)**\n" +
-                    "   - **For Lunch:** Identify a logical activity to have lunch after (e.g., the second or third attraction). **You MUST use the `nearbySearch` tool**, anchored on that attraction's coordinates, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
-                    "   - **For Dinner:** Identify the last main attraction of the day. **You MUST use the `nearbySearch` tool**, anchored on its location, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
-                    "   - **Important:** Do NOT use `textSearch` for finding restaurants. Use `nearbySearch` only to ensure proximity to attractions and limit results to 5 to optimize performance. Remember, these `placeId`s must come directly from `nearbySearch`.\n\n" +
-
-                    "**STEP 3: ASSEMBLE THE FINAL WAYPOINT LIST**\n" +
-                    "   - Create a complete, final list of ALL `placeId`s for the day. This list includes the starting point, all main attractions, and the two restaurant `placeId`s from Step 2. **All these `placeId`s must have been retrieved from `textSearch` or `nearbySearch` calls.**\n\n" +
-
-                    "**STEP 4: CALCULATE THE SINGLE OPTIMIZED ROUTE**\n" +
-                    "   - With the complete list of waypoints from Step 3, make **one single call** to `getOptimizedWaypointRoute` to get the most efficient travel plan for the entire day.\n" +
-                    "   - **REMEMBER:** Every `placeId` in the `origin`, `destination`, and `intermediateWaypoints` parameters MUST be prefixed with `place_id:` (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY`), and **MUST be an ID previously returned by `textSearch` or `nearbySearch`**.\n" +
-                    "   - Provide `departureTime` in full ISO 8601 format with UTC timezone, e.g., `2025-10-01T09:00:00Z`. Ensure it is at least 5 minutes in the future relative to the current time.\n\n" +
-
-                    "**STEP 5: CONSTRUCT THE FINAL JSON**\n" +
-                    "   - Using the optimized route data, build the `activityList`.\n" +
-                    "   - The list MUST start with a 'destination' activity (the starting point) and MUST end with a 'destination' activity (the final dinner restaurant).\n" +
-                    "   - For every 'destination' activity, include a complete `locationDetails` block with `placeId`. **This `placeId` MUST be one returned by `textSearch` or `nearbySearch`.** Do not leave it empty.\n" +
-                    "   - Set `estimatedStartTime` and `estimatedEndTime` for each activity in ISO 8601 format with UTC timezone, e.g., `2025-10-01T09:00:00Z`.\n\n" +
-
-                    "## 4. CONTEXT & JSON SCHEMA\n" + // Changed from 3 to 4 due to new section
-                    "**Current Day's Context (Backend Injected):**\n" +
-                    "Trip Start Date: {TRIP_START_DATE_ISO_8601}\n" +
-                    "Today's Date: {CURRENT_DAY_DATE_ISO_8601}\n" +
-                    "Key Attractions for Today: {KEY_ATTRACTIONS_FOR_TODAY_LIST}\n" +
-                    "Previous Day's End Location/Start Location for Today: {PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}\n" +
-                    "User's Full Trip Request: {FULL_USER_TRIP_REQUEST}\n\n" +
-
-                    "**JSON Output Format (Adhere Strictly):**\n" +
-                    "```json\n" +
-                    "{\n" +
-                    "  \"date\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-                    "  \"daySummary\": \"string\",\n" +
-                    "  \"warnings\": \"string\",\n" +
-                    "  \"activityList\": [\n" +
-                    "    {\n" +
-                    "      \"activityType\": \"destination\" | \"travel\",\n" +
-                    "      \"estimatedStartTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-                    "      \"estimatedEndTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-                    "      \"locationDetails\": {\n" +
-                    "        \"placeId\": \"string\",\n" +
-                    "        \"name\": \"string\"\n" +
-                    "      },\n" +
-                    "      \"travelDetails\": {\n" +
-                    "        \"origin\": \"string\",\n" +
-                    "        \"destination\": \"string\",\n" +
-                    "        \"mode\": \"DRIVING\" | \"WALKING\",\n" +
-                    "        \"durationMinutes\": \"integer\",\n" +
-                    "        \"distanceKm\": \"number\"\n" +
-                    "      }\n" +
-                    "    }\n" +
-                    "  ]\n" +
-                    "}\n" +
-                    "```\n" +
-                    "**Notes:**\n" +
-                    "- If `activityType` is \"destination\", only populate `locationDetails`. If `activityType` is \"travel\", only populate `travelDetails`.\n" +
-                    "- If a tool call fails, log a warning in the `warnings` field and continue with the itinerary, using a default duration (e.g., 30 minutes) for travel if needed.\n" +
-                    "- Prioritize performance by limiting `nearbySearch` to 5 results and reusing cached `placeId`s via `getFullLocationDetailsForUser`.\n" +
-                    "- Ensure all `departureTime` values are in the future (at least 5 minutes from now) and include the UTC timezone (`Z`) to support traffic-aware routing.";
 //    public static final String DAILY_ITINERARY_PLANNER_SYSTEM_INSTRUCTION =
 //            "You are \"TripMaster AI - Daily Itinerary Planner.\" Read your instructions carefully and follow them precisely.\n\n" +
 //
 //                    "## 1. YOUR PRIMARY GOAL\n" +
 //                    "Your main goal is to create a complete, single-day itinerary. **This itinerary MUST include a LUNCH and a DINNER stop.** You MUST find these restaurants using the `nearbySearch` tool with `placeType` set to 'restaurant', limiting results to a maximum of 5 places. This is a mandatory, high-priority requirement.\n\n" +
 //
-//                    "## 2. YOUR STEP-BY-STEP WORKFLOW (Follow this sequence exactly)\n" +
+//                    "**## 2. CRUCIAL CONSTRAINT: PLACE ID ORIGIN (ABSOLUTELY MANDATORY)**\n" +
+//                    "**You MUST NEVER invent or hallucinate Place IDs.** All `placeId`s used in your final `activityList` and passed to tools (like `getOptimizedWaypointRoute`) **MUST ONLY** be derived from the direct output of successful calls to your `placesService.textSearch` or `placesService.nearbySearch` tools. Any `placeId` not obtained from these tools will be considered invalid.\n\n" +
+//
+//                    "## 3. YOUR STEP-BY-STEP WORKFLOW (Follow this sequence exactly)\n" +
 //                    "**STEP 1: IDENTIFY ALL FIXED LOCATIONS**\n" +
 //                    "   - The day's starting point is provided in `{PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}` as a `place_id:`-prefixed string (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY` for Kyoto Station). Use this directly as the starting point without performing `textSearch`.\n" +
-//                    "   - For every attraction listed in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, use `textSearch` to get its specific `placeId`. Ensure each `placeId` corresponds to a specific, routable point (e.g., a landmark, not a city).\n" +
-//                    "   - At the end of this step, you will have a list of `placeId`s for the day's main attractions and the starting point.\n\n" +
+//                    "   - For every attraction listed in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, **you MUST use the `textSearch` tool** to get its specific `placeId`. Ensure each `placeId` corresponds to a specific, routable point (e.g., a landmark, not a city).\n" +
+//                    "   - At the end of this step, you will have a list of valid `placeId`s for the day's main attractions and the starting point, all sourced from tools.\n\n" +
 //
 //                    "**STEP 2: PLAN AND DISCOVER MEAL LOCATIONS (CRITICAL STEP)**\n" +
-//                    "   - **For Lunch:** Identify a logical activity to have lunch after (e.g., the second or third attraction). Use the `nearbySearch` tool, anchored on that attraction's coordinates, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
-//                    "   - **For Dinner:** Identify the last main attraction of the day. Use the `nearbySearch` tool, anchored on its location, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
-//                    "   - **Important:** Do NOT use `textSearch` for finding restaurants. Use `nearbySearch` only to ensure proximity to attractions and limit results to 5 to optimize performance.\n\n" +
+//                    "   - **For Lunch:** Identify a logical activity to have lunch after (e.g., the second or third attraction). **You MUST use the `nearbySearch` tool**, anchored on that attraction's coordinates, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
+//                    "   - **For Dinner:** Identify the last main attraction of the day. **You MUST use the `nearbySearch` tool**, anchored on its location, to find up to 5 restaurants with `placeType` set to 'restaurant'. Select one restaurant and save its `placeId`.\n" +
+//                    "   - **Important:** Do NOT use `textSearch` for finding restaurants. Use `nearbySearch` only to ensure proximity to attractions and limit results to 5 to optimize performance. Remember, these `placeId`s must come directly from `nearbySearch`.\n\n" +
 //
 //                    "**STEP 3: ASSEMBLE THE FINAL WAYPOINT LIST**\n" +
-//                    "   - Create a complete, final list of ALL `placeId`s for the day. This list includes the starting point, all main attractions, and the two restaurant `placeId`s from Step 2.\n\n" +
+//                    "   - Create a complete, final list of ALL `placeId`s for the day. This list includes the starting point, all main attractions, and the two restaurant `placeId`s from Step 2. **All these `placeId`s must have been retrieved from `textSearch` or `nearbySearch` calls.**\n\n" +
 //
 //                    "**STEP 4: CALCULATE THE SINGLE OPTIMIZED ROUTE**\n" +
 //                    "   - With the complete list of waypoints from Step 3, make **one single call** to `getOptimizedWaypointRoute` to get the most efficient travel plan for the entire day.\n" +
-//                    "   - **REMEMBER:** Every `placeId` in the `origin`, `destination`, and `intermediateWaypoints` parameters MUST be prefixed with `place_id:` (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY`).\n" +
+//                    "   - **REMEMBER:** Every `placeId` in the `origin`, `destination`, and `intermediateWaypoints` parameters MUST be prefixed with `place_id:` (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY`), and **MUST be an ID previously returned by `textSearch` or `nearbySearch`**.\n" +
 //                    "   - Provide `departureTime` in full ISO 8601 format with UTC timezone, e.g., `2025-10-01T09:00:00Z`. Ensure it is at least 5 minutes in the future relative to the current time.\n\n" +
 //
 //                    "**STEP 5: CONSTRUCT THE FINAL JSON**\n" +
 //                    "   - Using the optimized route data, build the `activityList`.\n" +
 //                    "   - The list MUST start with a 'destination' activity (the starting point) and MUST end with a 'destination' activity (the final dinner restaurant).\n" +
-//                    "   - For every 'destination' activity, include a complete `locationDetails` block with `placeId` from `textSearch` or `nearbySearch` results. Do not leave it empty.\n" +
+//                    "   - For every 'destination' activity, include a complete `locationDetails` block with `placeId`. **This `placeId` MUST be one returned by `textSearch` or `nearbySearch`.** Do not leave it empty.\n" +
 //                    "   - Set `estimatedStartTime` and `estimatedEndTime` for each activity in ISO 8601 format with UTC timezone, e.g., `2025-10-01T09:00:00Z`.\n\n" +
 //
-//                    "## 3. CONTEXT & JSON SCHEMA\n" +
+//                    "## 4. CONTEXT & JSON SCHEMA\n" + // Changed from 3 to 4 due to new section
 //                    "**Current Day's Context (Backend Injected):**\n" +
 //                    "Trip Start Date: {TRIP_START_DATE_ISO_8601}\n" +
 //                    "Today's Date: {CURRENT_DAY_DATE_ISO_8601}\n" +
@@ -230,36 +128,114 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
 //
 //                    "**JSON Output Format (Adhere Strictly):**\n" +
 //                    "```json\n" +
-//            "{\n" +
-//            "  \"date\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-//            "  \"daySummary\": \"string\",\n" +
-//            "  \"warnings\": \"string\",\n" +
-//            "  \"activityList\": [\n" +
-//            "    {\n" +
-//            "      \"activityType\": \"destination\" | \"travel\",\n" +
-//            "      \"estimatedStartTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-//            "      \"estimatedEndTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
-//            "      \"locationDetails\": {\n" +
-//            "        \"placeId\": \"string\",\n" +
-//            "        \"name\": \"string\"\n" +
-//            "      },\n" +
-//            "      \"travelDetails\": {\n" +
-////            "        \"id\": \"string\",\n" +
-//            "        \"origin\": \"string\",\n" +
-//            "        \"destination\": \"string\",\n" +
-//            "        \"mode\": \"DRIVING\" | \"WALKING\",\n" +
-//            "        \"durationMinutes\": \"integer\",\n" +
-//            "        \"distanceKm\": \"number\"\n" +
-//            "      }\n" +
-//            "    }\n" +
-//            "  ]\n" +
-//            "}\n" +
-//            "```\n" +
-//            "**Notes:**\n" +
-//            "- If `activityType` is \"destination\", only populate `locationDetails`. If `activityType` is \"travel\", only populate `travelDetails`.\n" +
-//            "- If a tool call fails, log a warning in the `warnings` field and continue with the itinerary, using a default duration (e.g., 30 minutes) for travel if needed.\n" +
-//            "- Prioritize performance by limiting `nearbySearch` to 5 results and reusing cached `placeId`s via `getFullLocationDetailsForUser`.\n" +
-//            "- Ensure all `departureTime` values are in the future (at least 5 minutes from now) and include the UTC timezone (`Z`) to support traffic-aware routing.";
+//                    "{\n" +
+//                    "  \"date\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
+//                    "  \"daySummary\": \"string\",\n" +
+//                    "  \"warnings\": \"string\",\n" +
+//                    "  \"activityList\": [\n" +
+//                    "    {\n" +
+//                    "      \"activityType\": \"destination\" | \"travel\",\n" +
+//                    "      \"estimatedStartTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
+//                    "      \"estimatedEndTime\": \"YYYY-MM-DDTHH:MM:SSZ\",\n" +
+//                    "      \"locationDetails\": {\n" +
+//                    "        \"placeId\": \"string\",\n" +
+//                    "        \"name\": \"string\"\n" +
+//                    "      },\n" +
+//                    "      \"travelDetails\": {\n" +
+//                    "        \"origin\": \"string\",\n" +
+//                    "        \"destination\": \"string\",\n" +
+//                    "        \"mode\": \"DRIVING\" | \"WALKING\",\n" +
+//                    "        \"durationMinutes\": \"integer\",\n" +
+//                    "        \"distanceKm\": \"number\"\n" +
+//                    "      }\n" +
+//                    "    }\n" +
+//                    "  ]\n" +
+//                    "}\n" +
+//                    "```\n" +
+//                    "**Notes:**\n" +
+//                    "- If `activityType` is \"destination\", only populate `locationDetails`. If `activityType` is \"travel\", only populate `travelDetails`.\n" +
+//                    "- If a tool call fails, log a warning in the `warnings` field and continue with the itinerary, using a default duration (e.g., 30 minutes) for travel if needed.\n" +
+//                    "- Prioritize performance by limiting `nearbySearch` to 5 results and reusing cached `placeId`s via `getFullLocationDetailsForUser`.\n" +
+//                    "- Ensure all `departureTime` values are in the future (at least 5 minutes from now) and include the UTC timezone (`Z`) to support traffic-aware routing.";
+
+    public static final String DAILY_ITINERARY_PLANNER_SYSTEM_INSTRUCTION =
+            """
+            You are "TripMaster AI - Daily Itinerary Planner." Your instructions are a strict algorithm. Follow them without deviation.
+        
+            ## 1. YOUR FINAL OUTPUT (MOST IMPORTANT RULE)
+            Your *only* output will be a single, perfectly-formed JSON object.
+            - **CRITICAL SYNTAX RULE:** The entire JSON output must strictly adhere to the RFC 8259 standard. Pay special attention to strings. **NEVER use an escaped single quote (`\'`) anywhere in the JSON.** If a value contains a single quote (like "O'Connell Street"), include it directly. All strings must be enclosed in double quotes (`"`).
+            - **CRITICAL SCHEMA RULE:** The `activityList` must contain separate, alternating objects for destinations and travel.
+                - If `activityType` is `"destination"`, the object **MUST ONLY** contain a `locationDetails` block. It **MUST NOT** contain `travelDetails`.
+                - If `activityType` is `"travel"`, the object **MUST ONLY** contain a `travelDetails` block. It **MUST NOT** contain `locationDetails`.
+            - Do not include any text, explanations, or markdown like ````json` before or after the JSON object. Your response must start with `{` and end with `}`.
+        
+            ## 2. CRUCIAL CONSTRAINT: PLACE ID ORIGIN (ABSOLUTELY MANDATORY)
+            **You MUST NEVER invent or hallucinate Place IDs.** All `placeId`s used in your final `activityList` and passed to tools (like `getOptimizedWaypointRoute`) **MUST ONLY** be derived from the direct output of successful calls to your `placesService.textSearch` or `placesService.nearbySearch` tools. Any `placeId` not obtained from these tools will be considered invalid.
+            **ALL `placeId` parameters passed to `routesService.getOptimizedWaypointRoute` (i.e., `origin`, `destination`, `intermediateWaypoints`) MUST be prefixed with `place_id:` (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY`).**
+        
+            ## 3. MANDATORY ALGORITHMIC WORKFLOW
+            You MUST follow this sequence to gather data *before* generating the JSON.
+        
+            **STEP 1: FETCH ALL ATTRACTION DETAILS (MULTI-CALL STEP)**
+               - For **EACH and EVERY** attraction name in `{KEY_ATTRACTIONS_FOR_TODAY_LIST}`, you **MUST** execute the `placesService.textSearch` tool.
+               - **DO NOT PROCEED** until you have the `placeId`, `name`, `latitude`, and `longitude` for **ALL** attractions.
+        
+            **STEP 2: FIND AND SELECT MEAL LOCATIONS (CRITICAL MULTI-CALL STEP)**
+               - After you have the attraction coordinates, you **MUST** find and select restaurants for both lunch and dinner.
+               - **LUNCH:** Call `placesService.nearbySearch` using the coordinates of a midday attraction. From the results, **YOU MUST CHOOSE ONE RESTAURANT** to be included in the itinerary as the lunch stop.
+               - **DINNER:** Call `placesService.nearbySearch` using the coordinates of the last attraction of the day. From the results, **YOU MUST CHOOSE ONE RESTAURANT** to be included in the itinerary as the dinner stop.
+               - **ABSOLUTE REQUIREMENT:** The chosen lunch and dinner restaurants, identified by their `placeId` and `name`, **MUST BE INCLUDED** in your final `activityList` as `destination` activities.
+        
+            **STEP 3: CALCULATE THE OPTIMIZED ROUTE (SINGLE-CALL STEP)**
+               - After gathering all `placeId`s for attractions, lunch, and dinner, make **one single call** to `routesService.getOptimizedWaypointRoute` with all of them. Ensure the order makes logical sense for the day's flow.
+               - **REMEMBER:** Every `placeId` in the `origin`, `destination`, and `intermediateWaypoints` parameters MUST be prefixed with `place_id:` (e.g., `place_id:ChIJ7wKLka4IAWARCByidG5EGrY`), and **MUST be an ID previously returned by `textSearch` or `nearbySearch`**.
+        
+            **STEP 4: FINAL JSON ASSEMBLY (FINAL STEP)**
+               - After all tool calls are complete, construct the final JSON object, strictly following the syntax and schema rules from Section 1. Ensure all attractions and the **selected lunch and dinner places** are present in the `activityList`.
+        
+            ## 4. CONTEXT & JSON SCHEMA
+            **Current Day's Context (Backend Injected):**
+            Trip Start Date: {TRIP_START_DATE_ISO_8601}
+            Today's Date: {CURRENT_DAY_DATE_ISO_8601}
+            Key Attractions for Today: {KEY_ATTRACTIONS_FOR_TODAY_LIST}
+            Previous Day's End Location/Start Location for Today: {PREVIOUS_DAY_END_LOCATION_OR_TODAY_START_LOCATION}
+            User's Full Trip Request: {FULL_USER_TRIP_REQUEST}
+        
+            **JSON Output Format (Adhere Strictly to Rules in Section 1):**
+            ```json
+            {
+              "date": "YYYY-MM-DDTHH:MM:SSZ",
+              "daySummary": "string",
+              "warnings": "string",
+              "activityList": [
+                {
+                  "activityType": "destination",
+                  "estimatedStartTime": "YYYY-MM-DDTHH:MM:SSZ",
+                  "estimatedEndTime": "YYYY-MM-DDTHH:MM:SSZ",
+                  "locationDetails": {
+                    "placeId": "string",
+                    "name": "string",
+                    "latitude": "number",
+                    "longitude": "number"
+                  }
+                },
+                {
+                  "activityType": "travel",
+                  "estimatedStartTime": "YYYY-MM-DDTHH:MM:SSZ",
+                  "estimatedEndTime": "YYYY-MM-DDTHH:MM:SSZ",
+                  "travelDetails": {
+                    "origin": "string",
+                    "destination": "string",
+                    "mode": "DRIVING" | "WALKING",
+                    "durationMinutes": "integer",
+                    "distanceKm": "number"
+                  }
+                }
+              ]
+            }
+            ```
+            """;
 
     @PostConstruct
     public void init() {
@@ -373,9 +349,9 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                             .map(activity -> activity.getLocationDetails().getPlaceId())
                             .forEach(visitedPlaceIds::add);
                 } else {
-                    log.error("Failed to generate itinerary for day {}", i + 1);
-                    tripWarnings.add("Failed to generate itinerary for day " + i + 1);
-                    break;
+                    log.error("Failed to generate itinerary for day {}", (i + 1));
+                    tripWarnings.add("Failed to generate itinerary for day " + (i + 1));
+//                    break;
                 }
             }
 
@@ -416,6 +392,51 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
         }
     }
 
+//    private static String getDayStartLocation(int i, TripOverviewDTO tripOverview, List<DailyItineraryDTO> dailyItineraryList) {
+//        String currentDayStartLocation;
+//        if (i == 0) {
+//            // For Day 1, start with central station of destination
+//            LLM_LocationDetailsDTO startLocationDetails = PlacesServiceImpl.textSearch(
+//                    tripOverview.getMainDestination() + " Station",
+//                    PlaceType.TRAIN_STATION.name()
+//            );
+//            if (startLocationDetails != null && startLocationDetails.getPlaceId() != null) {
+//                currentDayStartLocation = "place_id:" + startLocationDetails.getPlaceId();
+//                log.info("Resolved starting point for {} station to placeId: {}",
+//                        tripOverview.getMainDestination(),
+//                        startLocationDetails.getPlaceId());
+//            } else {
+//                log.warn("Could not find specific start location of {} station. Falling back to city center.", tripOverview.getMainDestination());
+//                startLocationDetails = PlacesServiceImpl.textSearch(
+//                        tripOverview.getMainDestination() + "City Centre",
+//                        PlaceType.CITY_HALL.name()
+//                );
+//                if (startLocationDetails != null && startLocationDetails.getPlaceId() != null) {
+//                    currentDayStartLocation = "place_id:" + startLocationDetails.getPlaceId();
+//                    log.info("Resolved starting point for {} city centre to placeId: {}",
+//                            tripOverview.getMainDestination(),
+//                            startLocationDetails.getPlaceId());
+//                } else {
+//                    log.error("Unable to get start destination for day 1");
+//                    return null;
+//                }
+//            }
+////            currentDayStartLocation = tripOverview.getMainDestination();
+//        } else {
+//            DailyItineraryDTO previousDayItinerary = dailyItineraryList.get(i - 1);
+//            TripActivityDTO lastActivity = previousDayItinerary.getActivityList().getLast();
+//            int size = previousDayItinerary.getActivityList().size() - 1;
+//            while (size > 0 && lastActivity.getActivityType() != TripActivityDTO.ActivityType.destination) {
+//                size--;
+//                lastActivity = previousDayItinerary.getActivityList().get(size);
+//            }
+////            currentDayStartLocation = lastActivity.getLocationDetails().getName();
+//            currentDayStartLocation = PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()) != null
+//                    ? PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()).getName()
+//                    : tripOverview.getMainDestination();
+//        }
+//        return currentDayStartLocation;
+//    }
     private static String getDayStartLocation(int i, TripOverviewDTO tripOverview, List<DailyItineraryDTO> dailyItineraryList) {
         String currentDayStartLocation;
         if (i == 0) {
@@ -432,8 +453,8 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
             } else {
                 log.warn("Could not find specific start location of {} station. Falling back to city center.", tripOverview.getMainDestination());
                 startLocationDetails = PlacesServiceImpl.textSearch(
-                        tripOverview.getMainDestination() + "City Centre",
-                        PlaceType.CITY_HALL.name()
+                        tripOverview.getMainDestination() + " City Centre", // Added space for clarity
+                        PlaceType.CITY_HALL.name() // Consider if CITY_HALL is always appropriate for "city centre"
                 );
                 if (startLocationDetails != null && startLocationDetails.getPlaceId() != null) {
                     currentDayStartLocation = "place_id:" + startLocationDetails.getPlaceId();
@@ -441,23 +462,41 @@ public class ItineraryGenerationServiceImpl implements ItineraryGenerationServic
                             tripOverview.getMainDestination(),
                             startLocationDetails.getPlaceId());
                 } else {
-                    log.error("Unable to get start destination for day 1");
-                    return null;
+                    log.error("Unable to get start destination for day 1. Returning null, which may lead to errors.");
+                    // IMPORTANT: If this returns null, the prompt will receive "null" as the start location,
+                    // which is likely not a valid place_id string and can cause issues.
+                    // Consider returning a default known place_id or throwing an exception.
+                    return null; // This will result in "null" in the prompt string.
                 }
             }
-//            currentDayStartLocation = tripOverview.getMainDestination();
         } else {
             DailyItineraryDTO previousDayItinerary = dailyItineraryList.get(i - 1);
             TripActivityDTO lastActivity = previousDayItinerary.getActivityList().getLast();
             int size = previousDayItinerary.getActivityList().size() - 1;
-            while (size > 0 && lastActivity.getActivityType() != TripActivityDTO.ActivityType.destination) {
+            // Iterate backwards to find the last 'destination' activity
+            while (size >= 0 && lastActivity.getActivityType() != TripActivityDTO.ActivityType.destination) {
                 size--;
-                lastActivity = previousDayItinerary.getActivityList().get(size);
+                if (size >= 0) {
+                    lastActivity = previousDayItinerary.getActivityList().get(size);
+                } else {
+                    log.warn("No destination activity found in the previous day's itinerary. Falling back to main destination.");
+                    return "place_id:UNKNOWN"; // Fallback with a placeholder
+                }
             }
-//            currentDayStartLocation = lastActivity.getLocationDetails().getName();
-            currentDayStartLocation = PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()) != null
-                    ? PlacesServiceImpl.getFullLocationDetailsForUser(lastActivity.getLocationDetails().getPlaceId()).getName()
-                    : tripOverview.getMainDestination();
+
+            // Ensure lastActivity is a destination and has locationDetails
+            if (lastActivity.getActivityType() == TripActivityDTO.ActivityType.destination && lastActivity.getLocationDetails() != null) {
+                String placeId = lastActivity.getLocationDetails().getPlaceId();
+                if (placeId != null && !placeId.isEmpty()) {
+                    currentDayStartLocation = "place_id:" + placeId; // Ensure it's prefixed
+                } else {
+                    log.warn("Previous day's last activity has null/empty placeId. Falling back to main destination.");
+                    currentDayStartLocation = "place_id:UNKNOWN"; // Fallback
+                }
+            } else {
+                log.warn("Previous day's last activity is not a destination or missing details. Falling back to main destination.");
+                currentDayStartLocation = "place_id:UNKNOWN"; // Fallback
+            }
         }
         return currentDayStartLocation;
     }

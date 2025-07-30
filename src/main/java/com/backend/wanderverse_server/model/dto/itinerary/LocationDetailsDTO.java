@@ -19,6 +19,8 @@ public class LocationDetailsDTO {
     private String name;
     private String editorialSummary;
     private String formattedAddress;
+    private double latitude;
+    private double longitude;
     private List<String> openingHours;
     private double rating;
     private String website;
