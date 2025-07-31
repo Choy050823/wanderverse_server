@@ -9,6 +9,8 @@ import com.backend.wanderverse_server.model.mappers.Mapper; // Assuming this is 
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.security.JwtUtil; // Assuming your JWT utility class
 import com.backend.wanderverse_server.service.impl.AuthServiceImpl;
+import com.backend.wanderverse_server.util.exceptions.LoginFailedException;
+import com.backend.wanderverse_server.util.exceptions.SignupFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,14 +99,14 @@ public class AuthServiceTest {
         when(userMapper.mapTo(any(UserEntity.class))).thenReturn(mockUserDTO);
 
         // Call the service method
-        Optional<AuthResponseDTO> response = authService.register(signUpRequestDTO);
+        AuthResponseDTO response = authService.register(signUpRequestDTO);
 
         // Assertions
-        assertTrue(response.isPresent());
-        assertEquals("mockJwtToken", response.get().getToken());
+        assertNotNull(response);
+        assertEquals("mockJwtToken", response.getToken());
         // Add assertions for the user object within AuthResponseDTO if applicable
-        assertEquals(mockUserDTO.getEmail(), response.get().getUser().getEmail());
-        assertEquals(mockUserDTO.getUsername(), response.get().getUser().getUsername());
+        assertEquals(mockUserDTO.getEmail(), response.getUser().getEmail());
+        assertEquals(mockUserDTO.getUsername(), response.getUser().getUsername());
 
 
         // Verify interactions with mocks
@@ -123,12 +125,12 @@ public class AuthServiceTest {
         when(userRepository.existsByEmail(signUpRequestDTO.getEmail())).thenReturn(true);
 
         // Call the service method and expect an exception
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+        RuntimeException thrown = assertThrows(SignupFailedException.class, () -> {
             authService.register(signUpRequestDTO);
         });
 
         // Assertions
-        assertEquals("User Already Exists!", thrown.getMessage());
+        assertEquals("User with email '" + signUpRequestDTO.getEmail() + "' already exists!", thrown.getMessage());
 
         // Verify interactions (should not proceed to encode/save)
         verify(userRepository, times(1)).existsByEmail(signUpRequestDTO.getEmail());
@@ -165,12 +167,12 @@ public class AuthServiceTest {
         when(userMapper.mapTo(any(UserEntity.class))).thenReturn(mockUserDTO);
 
         // Call the service method, ensure it's authenticate for login
-        Optional<AuthResponseDTO> response = authService.authenticate(loginRequestDTO);
+        AuthResponseDTO response = authService.authenticate(loginRequestDTO);
 
         // Assertions
-        assertTrue(response.isPresent());
-        assertEquals("mockJwtToken", response.get().getToken());
-        assertEquals(mockUserDTO.getEmail(), response.get().getUser().getEmail());
+        assertNotNull(response);
+        assertEquals("mockJwtToken", response.getToken());
+        assertEquals(mockUserDTO.getEmail(), response.getUser().getEmail());
 
         // VERIFY INTERACTIONS:
         verify(authenticationManager, times(1)).authenticate(
@@ -185,17 +187,19 @@ public class AuthServiceTest {
     }
 
     @Test
-    void login_invalidCredentials_returnsEmptyOptional() { // Renamed the test method
+    void login_invalidCredentials_throwsException() { // Renamed the test method
         // Mock behavior for invalid credentials
         when(authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
         // Call the service method
-        Optional<AuthResponseDTO> response = authService.authenticate(loginRequestDTO);
+        RuntimeException thrown = assertThrows(LoginFailedException.class, () -> {
+            authService.authenticate(loginRequestDTO);
+        });
 
         // Assertions: Now check if the Optional is empty, as per your service's observed behavior
-        assertFalse(response.isPresent());
+        assertEquals("Invalid email or password provided.", thrown.getMessage());
 
         // Verify interactions (should not proceed to generate token, find user, or map)
         verify(authenticationManager, times(1)).authenticate(
@@ -215,7 +219,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void login_userNotFoundAfterAuthentication_returnsEmptyOptional() { // Updated method name
+    void login_userNotFoundAfterAuthentication_throwsException() { // Updated method name
         Authentication authentication = mock(Authentication.class);
         UserDetails mockUserDetails = mock(UserDetails.class);
 //        when(mockUserDetails.getUsername()).thenReturn(loginRequestDTO.getEmail());
@@ -227,10 +231,12 @@ public class AuthServiceTest {
         when(userRepository.findUserByEmail(loginRequestDTO.getEmail())).thenReturn(Optional.empty());
 
         // Call the service method
-        Optional<AuthResponseDTO> response = authService.authenticate(loginRequestDTO);
+        RuntimeException thrown = assertThrows(LoginFailedException.class, () -> {
+            authService.authenticate(loginRequestDTO);
+        });
 
-        // Assertions: Now check if the Optional is empty, as this is the observed behavior
-        assertFalse(response.isPresent());
+        // Assertions: Now check if the Optional is empty, as per your service's observed behavior
+        assertEquals("Invalid email or password provided.", thrown.getMessage());
 
         // Verify interactions
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));

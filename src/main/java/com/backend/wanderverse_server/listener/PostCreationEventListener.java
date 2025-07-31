@@ -57,8 +57,6 @@ public class PostCreationEventListener {
                                 log.info("Uploading embedding for post ID: {} to Qdrant.", postCreatedEvent.getPostId());
                                 qdrantService.upsertPosts(List.of(post), List.of(embedding));
                                 log.info("Post embedding for ID: {} uploaded to Qdrant successfully.", postCreatedEvent.getPostId());
-
-
                             },
                             () -> log.error("Could not find post with ID {} for embedding. Skipping.", postCreatedEvent.getPostId())
                     );
