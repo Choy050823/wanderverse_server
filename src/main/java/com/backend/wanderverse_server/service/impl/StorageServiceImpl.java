@@ -52,23 +52,19 @@ public class StorageServiceImpl implements StorageService {
             );
 
             return generateFileUrl(fileName);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new IOException("Error uploading file: " + e.getMessage(), e);
         }
     }
 
     @Override
     public byte[] getFile(String filename) throws IOException {
-        try {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(filename)
-                    .build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(filename)
+                .build();
 
-            return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
-        } catch (Exception e) {
-            throw new IOException("Error downloading file: " + e.getMessage(), e);
-        }
+        return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
     }
 
     @Override

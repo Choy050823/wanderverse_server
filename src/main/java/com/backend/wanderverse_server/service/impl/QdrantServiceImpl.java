@@ -169,7 +169,6 @@ public class QdrantServiceImpl implements QdrantService {
             ).get();
 
             return searchResults.stream()
-//                    .parallel()
                     .map(this::mapScoredPointsToPost)
                     .filter(Objects::nonNull)
                     .toList();

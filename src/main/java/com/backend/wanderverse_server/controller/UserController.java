@@ -27,9 +27,6 @@ public class UserController {
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
-        return userService.findOne(id)
-                    .map(userMapper::mapTo)
-                    .map(user -> ResponseEntity.ok().body(user))
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        return ResponseEntity.ok().body(userMapper.mapTo(userService.findOne(id)));
     }
 }

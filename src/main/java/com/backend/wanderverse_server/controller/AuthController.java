@@ -22,20 +22,22 @@ public class AuthController {
     // just testing hope work sss
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
-        return authService.authenticate(loginRequest)
-                .map(response -> ResponseEntity.ok().body(response))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        return ResponseEntity
+                .ok()
+                .body(authService.authenticate(loginRequest));
     }
 
     @PostMapping("/signup")
     public ResponseEntity<AuthResponseDTO> signUp(@RequestBody SignUpRequestDTO signUpRequest) {
-        try {
-            return authService.register(signUpRequest)
-                    .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                    .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(authService.register(signUpRequest));
+//        try {
+//            return authService.register(signUpRequest)
+//                    .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
+//                    .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        }
     }
 }

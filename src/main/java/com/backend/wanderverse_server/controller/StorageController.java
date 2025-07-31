@@ -32,20 +32,17 @@ public class StorageController {
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String fileName) throws IOException{
-        try {
-            byte[] data = storageService.getFile(fileName);
-            if (data == null || data.length == 0) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null);
-            }
-            ByteArrayResource resource = new ByteArrayResource(data);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .header("Content-Disposition", "attachment; filename=" + fileName)
-                    .body(resource);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        byte[] data = storageService.getFile(fileName);
+        if (data == null || data.length == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
         }
+        ByteArrayResource resource = new ByteArrayResource(data);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .header("Content-Disposition", "attachment; filename=" + fileName)
+                .body(resource);
+
     }
 }

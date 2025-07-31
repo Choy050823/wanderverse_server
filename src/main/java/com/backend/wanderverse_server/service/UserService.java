@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface UserService {
     UserEntity save(UserEntity userEntity);
 
-    Optional<UserEntity> findOne(long id);
+    UserEntity findOne(long id);
 
     boolean isExists(long id);
 }

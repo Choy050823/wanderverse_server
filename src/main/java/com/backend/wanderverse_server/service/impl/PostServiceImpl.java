@@ -10,6 +10,7 @@ import com.backend.wanderverse_server.repository.DestinationRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.PostService;
 import com.backend.wanderverse_server.service.RabbitMQProducer;
+import com.backend.wanderverse_server.util.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
@@ -120,12 +121,12 @@ public class PostServiceImpl implements PostService {
             // Validate and parse creatorId
             Long creatorId = Long.parseLong(post.getCreatorId());
             UserEntity creator = userRepository.findById(creatorId)
-                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + creatorId));
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + creatorId));
 
             // Validate and parse destinationId
             Long destinationId = Long.parseLong(post.getDestinationId());
             DestinationEntity destination = destinationRepository.findById(destinationId)
-                    .orElseThrow(() -> new RuntimeException("Destination not found with ID: " + destinationId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Destination not found with ID: " + destinationId));
 
             // Build PostEntity
             PostEntity postEntity = PostEntity.builder()

@@ -17,15 +17,13 @@ public class GameController {
     @GetMapping(path = "/points")
     public ResponseEntity<Integer> getGamePoints(@RequestParam Long userId) {
         Integer gamePoint = gameService.getGamePoints(userId);
-        return gamePoint != null ? ResponseEntity.ok().body(gamePoint)
-                                 : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        return ResponseEntity.ok().body(gamePoint);
     }
 
     @PostMapping(path = "/points")
     public ResponseEntity<Integer> addGamePoints(@RequestParam Long userId, @RequestParam Integer newGamePoint) {
         Integer gamePoint = gameService.addGamePoints(userId, newGamePoint);
-        return gamePoint != null ? ResponseEntity.status(HttpStatus.CREATED).body(gamePoint)
-                : ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(gamePoint);
     }
 
     @GetMapping(path = "/badges")
@@ -35,10 +33,6 @@ public class GameController {
 
     @PostMapping(path = "/badges")
     public ResponseEntity<String> achievementUnlocked(@RequestParam Long userId, @RequestParam String achievementName) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(gameService.achievementUnlocked(userId, achievementName));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(gameService.achievementUnlocked(userId, achievementName));
     }
 }

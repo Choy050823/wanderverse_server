@@ -57,51 +57,34 @@ public class PostController {
     @GetMapping(path = "/sharing/search")
     public ResponseEntity<List<PostDTO>> searchSharingPosts(@RequestParam String query) {
         return ResponseEntity.ok().body(
-                recommendationService
-                        .getRecommendedPostsByQuery(query, PostType.post)
-//                        .stream()
-//                        .map(postMapper::mapTo)
-//                        .toList()
+                recommendationService.getRecommendedPostsByQuery(query, PostType.post)
         );
     }
 
     @GetMapping(path = "/discussion/search")
     public ResponseEntity<List<PostDTO>> searchDiscussionPosts(@RequestParam String query) {
         return ResponseEntity.ok().body(
-                recommendationService
-                        .getRecommendedPostsByQuery(query, PostType.experience)
-//                        .stream()
-//                        .map(postMapper::mapTo)
-//                        .toList()
+                recommendationService.getRecommendedPostsByQuery(query, PostType.experience)
+
         );
     }
 
     @GetMapping(path = "/sharing/recommend")
     public ResponseEntity<List<PostDTO>> recommendSharingPosts(@RequestParam Long userId) {
         return ResponseEntity.ok().body(
-                recommendationService
-                        .getRecommendedPostsForUser(userId, PostType.post)
-//                        .stream()
-//                        .map(postMapper::mapFrom)
-//                        .toList()
+                recommendationService.getRecommendedPostsForUser(userId, PostType.post)
         );
     }
 
     @GetMapping(path = "/discussion/recommend")
     public ResponseEntity<List<PostDTO>> recommendDiscussionPosts(@RequestParam Long userId) {
         return ResponseEntity.ok().body(
-                recommendationService
-                        .getRecommendedPostsForUser(userId, PostType.experience)
-//                        .stream()
-//                        .map(postMapper::mapFrom)
-//                        .toList()
+                recommendationService.getRecommendedPostsForUser(userId, PostType.experience)
         );
     }
 
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody CreatePostRequestDTO post) {
-        return Optional.of(postMapper.mapTo(postService.createPost(post)))
-                .map((postDTO) -> ResponseEntity.status(HttpStatus.CREATED).body(postDTO))
-                .orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(postMapper.mapTo(postService.createPost(post)));
     }
 }

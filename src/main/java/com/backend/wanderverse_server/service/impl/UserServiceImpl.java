@@ -3,6 +3,7 @@ package com.backend.wanderverse_server.service.impl;
 import com.backend.wanderverse_server.model.entity.auth.UserEntity;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.UserService;
+import com.backend.wanderverse_server.util.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserEntity> findOne(long id) {
-        return userRepository.findById(id);
+    public UserEntity findOne(long id) {
+        return userRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + id));
     }
 
     @Override

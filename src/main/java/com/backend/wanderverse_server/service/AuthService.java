@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface AuthService extends UserDetailsService {
     UserDetails loadUserByEmail(String email);
 
-    Optional<AuthResponseDTO> authenticate(LoginRequestDTO loginRequest);
+    AuthResponseDTO authenticate(LoginRequestDTO loginRequest);
 
-    Optional<AuthResponseDTO> register(SignUpRequestDTO signUpRequest);
+    AuthResponseDTO register(SignUpRequestDTO signUpRequest);
 }

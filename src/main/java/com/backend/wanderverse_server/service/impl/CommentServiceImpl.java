@@ -9,9 +9,11 @@ import com.backend.wanderverse_server.repository.CommentRepository;
 import com.backend.wanderverse_server.repository.PostRepository;
 import com.backend.wanderverse_server.repository.UserRepository;
 import com.backend.wanderverse_server.service.CommentService;
+import com.backend.wanderverse_server.util.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.module.ResolutionException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,43 +30,53 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentEntity createComment(CommentRequestDTO comment) {
+        long postId;
+        long userId;
+        Long parentCommentId = null;
+
         try {
             // Parse and validate post id
-            Long postId = Long.parseLong(comment.getPostId());
-            PostEntity post = postRepository
-                    .findById(postId)
-                    .orElseThrow(() -> new RuntimeException("Post not found"));
-
-            Long userId = Long.parseLong(comment.getUserId());
-            UserEntity user = userRepository
-                    .findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            // Handle parent comment
-            CommentEntity parentComment = null;
+            postId = Long.parseLong(comment.getPostId());
+            userId = Long.parseLong(comment.getUserId());
             if (comment.getParentCommentId() != null && !comment.getParentCommentId().isEmpty()) {
-                Long parentCommentId = Long.parseLong(comment.getParentCommentId());
-                parentComment = commentRepository
-                        .findById(parentCommentId)
-                        .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+                parentCommentId = Long.parseLong(comment.getParentCommentId());
             }
-
-            CommentEntity commentEntity = CommentEntity.builder()
-                    .content(comment.getContent())
-                    .post(post)
-                    .user(user)
-                    .parentComment(parentComment)
-                    .build();
-
-            CommentEntity savedCommentEntity = commentRepository.save(commentEntity);
-
-            post.setCommentsCount(post.getCommentsCount() + 1);
-            postRepository.save(post);
-
-            return savedCommentEntity;
         } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid ID Format: " + e.getMessage());
+            // Throw specific exception for invalid ID format
+            throw new RuntimeException("One or more provided IDs are in an invalid format.", e);
         }
+
+        // Parse and validate post id
+        PostEntity post = postRepository
+                .findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with ID: " + comment.getPostId() + " not found"));
+
+        UserEntity user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User with ID: " + comment.getUserId() + " not found"));
+
+        // Handle parent comment
+        CommentEntity parentComment = null;
+        if (parentCommentId != null) {
+            Long finalParentCommentId = parentCommentId;
+            parentComment = commentRepository
+                    .findById(parentCommentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent comment with ID " + finalParentCommentId + " not found."));
+        }
+
+        CommentEntity commentEntity = CommentEntity.builder()
+                .content(comment.getContent())
+                .post(post)
+                .user(user)
+                .parentComment(parentComment)
+                .build();
+
+        CommentEntity savedCommentEntity = commentRepository.save(commentEntity);
+
+        post.setCommentsCount(post.getCommentsCount() + 1);
+        postRepository.save(post);
+
+        return savedCommentEntity;
     }
 
     @Override
