@@ -61,9 +61,9 @@ public class RedisConfig {
 //                .withCacheConfiguration("routes", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
                 .withCacheConfiguration("textSearchPlaces", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
                 .withCacheConfiguration("nearbySearchPlaces", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
-                .withCacheConfiguration("photos", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
-                .withCacheConfiguration("recommended_posts", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
-                .withCacheConfiguration("query_posts", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
+//                .withCacheConfiguration("photos", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofDays(1)))
+//                .withCacheConfiguration("recommended_posts", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
+//                .withCacheConfiguration("query_posts", cacheConfiguration(redisObjectMapper).entryTtl(Duration.ofHours(1)))
                 .build();
     }
 
