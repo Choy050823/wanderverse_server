@@ -27,6 +27,9 @@ public class StorageServiceImpl implements StorageService {
     @Value("${aws.s3.endpoint}")
     private String endpoint;
 
+    @Value("${aws.cloudfront.domain}")
+    private String cloudfrontDomain;
+
     @Override
     public String saveFile(MultipartFile multipartFile) throws IOException {
         try {
@@ -74,7 +77,10 @@ public class StorageServiceImpl implements StorageService {
             return String.format("%s/%s/%s", endpoint, bucketName, fileName);
         } else {
             // S3 URL
-            return String.format("https://%s.s3.amazonaws.com/%s", bucketName, fileName);
+//            return String.format("https://%s.s3.amazonaws.com/%s", bucketName, fileName);
+
+            // AWS Cloudfront URL
+            return String.format("https://%s/%s", cloudfrontDomain, fileName);
         }
     }
 }
