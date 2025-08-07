@@ -33,11 +33,11 @@ public class PlacesServiceImpl {
     @Autowired
     private StorageService injectedStorageService;
 
-    @Autowired
-    private CacheManager injectedCacheManager;
+//    @Autowired
+//    private CacheManager injectedCacheManager;
 
-    @Autowired
-    private ObjectMapper redisObjectMapper;
+//    @Autowired
+//    private ObjectMapper redisObjectMapper;
 
     @Value("${google.maps.platform.api.key}")
     private String googleMapsApiKey;
@@ -51,17 +51,17 @@ public class PlacesServiceImpl {
 
     private static StorageService storageService;
 
-    private static CacheManager cacheManager;
+//    private static CacheManager cacheManager;
 
     private static ExecutorService executorService;
 
-    private static ObjectMapper serviceRedisObjectMapper;
+//    private static ObjectMapper serviceRedisObjectMapper;
 
     private static final int maxWidth = 1080;
 
     private static final int maxHeight = 1080;
 
-    private static final String PLACES_CACHE = "places";
+//    private static final String PLACES_CACHE = "places";
 
     private static final Map<String, LocationDetailsDTO> localPlaceDetailsCache = new ConcurrentHashMap<>();
 
@@ -71,8 +71,8 @@ public class PlacesServiceImpl {
         PlacesServiceImpl.placesDetailsFieldMasks = injectedPlacesDetailsFieldMasks;
         PlacesServiceImpl.storageService = injectedStorageService;
         PlacesServiceImpl.executorService = Executors.newFixedThreadPool(executorSize);
-        PlacesServiceImpl.cacheManager = injectedCacheManager;
-        PlacesServiceImpl.serviceRedisObjectMapper = redisObjectMapper;
+//        PlacesServiceImpl.cacheManager = injectedCacheManager;
+//        PlacesServiceImpl.serviceRedisObjectMapper = redisObjectMapper;
     }
 
     public static LLM_LocationDetailsDTO textSearch(String query, String placeType) {
@@ -181,76 +181,76 @@ public class PlacesServiceImpl {
             }
 
             // Concurrent HashMap Method for CACHING
-//            if (!localPlaceDetailsCache.containsKey(placeId)) {
-//                try {
-//                    localPlaceDetailsCache.put(placeId, getPlaceDetailsAsync(placeId).join());
-//                } catch (Exception e) {
-//                    log.error("Cannot get location from placeId: {}", placeId);
-//                    return null;
-//                }
-//            }
-//            return localPlaceDetailsCache.get(placeId);
+            if (!localPlaceDetailsCache.containsKey(placeId)) {
+                try {
+                    localPlaceDetailsCache.put(placeId, getPlaceDetailsAsync(placeId).join());
+                } catch (Exception e) {
+                    log.error("Cannot get location from placeId: {}", placeId);
+                    return null;
+                }
+            }
+            return localPlaceDetailsCache.get(placeId);
 
 
             // Redis Method of CACHING
-            Cache placesCache = cacheManager.getCache(PLACES_CACHE);
-            if (placesCache == null) {
-                log.error("Error finding places cache!");
-            } else {
-                Cache.ValueWrapper wrapper = placesCache.get(placeId);
-                if (wrapper != null) {
-                    Object cachedValue = wrapper.get();
-                    if (cachedValue instanceof LocationDetailsDTO) {
-                        log.info("Returning place details from Redis cache for placeId: {}", placeId);
-                        return (LocationDetailsDTO) cachedValue;
-                    } else if (cachedValue instanceof LinkedHashMap) {
-                        try {
-                            LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
-                            log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
-                            return locationDetails;
-                        } catch (IllegalArgumentException e) {
-                            log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
-                            placesCache.evict(placeId);
-                        }
-                    }
-                }
-            }
-
-            return getPlaceDetailsAsync(placeId).join();
+//            Cache placesCache = cacheManager.getCache(PLACES_CACHE);
+//            if (placesCache == null) {
+//                log.error("Error finding places cache!");
+//            } else {
+//                Cache.ValueWrapper wrapper = placesCache.get(placeId);
+//                if (wrapper != null) {
+//                    Object cachedValue = wrapper.get();
+//                    if (cachedValue instanceof LocationDetailsDTO) {
+//                        log.info("Returning place details from Redis cache for placeId: {}", placeId);
+//                        return (LocationDetailsDTO) cachedValue;
+//                    } else if (cachedValue instanceof LinkedHashMap) {
+//                        try {
+//                            LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
+//                            log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
+//                            return locationDetails;
+//                        } catch (IllegalArgumentException e) {
+//                            log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
+//                            placesCache.evict(placeId);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            return getPlaceDetailsAsync(placeId).join();
         }
     }
 
 
     private static CompletableFuture<LocationDetailsDTO> getPlaceDetailsAsync(String placeId) {
         // Concurrent HashMap METHOD for CACHING
-//        if (localPlaceDetailsCache.containsKey(placeId)) {
-//            log.info("Returning place details from cache for placeId: {}", placeId);
-//            return CompletableFuture.completedFuture(localPlaceDetailsCache.get(placeId));
-//        }
+        if (localPlaceDetailsCache.containsKey(placeId)) {
+            log.info("Returning place details from cache for placeId: {}", placeId);
+            return CompletableFuture.completedFuture(localPlaceDetailsCache.get(placeId));
+        }
 
         // Redis Method for CACHING
-        Cache placesCache = cacheManager.getCache(PLACES_CACHE);
-        if (placesCache == null) {
-            log.error("Error finding places cache!");
-        } else {
-            Cache.ValueWrapper wrapper = placesCache.get(placeId);
-            if (wrapper != null) {
-                Object cachedValue = wrapper.get();
-                if (cachedValue instanceof LocationDetailsDTO) {
-                    log.info("Returning place details from Redis cache for placeId: {}", placeId);
-                    return CompletableFuture.completedFuture((LocationDetailsDTO) cachedValue);
-                } else if (cachedValue instanceof LinkedHashMap) {
-                    try {
-                        LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
-                        log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
-                        return CompletableFuture.completedFuture(locationDetails);
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
-                        placesCache.evict(placeId);
-                    }
-                }
-            }
-        }
+//        Cache placesCache = cacheManager.getCache(PLACES_CACHE);
+//        if (placesCache == null) {
+//            log.error("Error finding places cache!");
+//        } else {
+//            Cache.ValueWrapper wrapper = placesCache.get(placeId);
+//            if (wrapper != null) {
+//                Object cachedValue = wrapper.get();
+//                if (cachedValue instanceof LocationDetailsDTO) {
+//                    log.info("Returning place details from Redis cache for placeId: {}", placeId);
+//                    return CompletableFuture.completedFuture((LocationDetailsDTO) cachedValue);
+//                } else if (cachedValue instanceof LinkedHashMap) {
+//                    try {
+//                        LocationDetailsDTO locationDetails = serviceRedisObjectMapper.convertValue(cachedValue, LocationDetailsDTO.class);
+//                        log.info("Returning converted place details from Redis cache for placeId: {}", placeId);
+//                        return CompletableFuture.completedFuture(locationDetails);
+//                    } catch (IllegalArgumentException e) {
+//                        log.warn("Failed to convert LinkedHashMap to LocationDetailsDTO from cache for placeId {}: {}", placeId, e.getMessage());
+//                        placesCache.evict(placeId);
+//                    }
+//                }
+//            }
+//        }
 
         // Cannot find cache in redis, then write through from the database in Google Places API
         log.info("Starting to get place details for place Id: {}", placeId);
@@ -297,15 +297,15 @@ public class PlacesServiceImpl {
                         .build();
 
                 // Concurrent HashMap CACHING
-//                localPlaceDetailsCache.put(placeDetails.placeId, fullLocationDetails);
+                localPlaceDetailsCache.put(placeDetails.placeId, fullLocationDetails);
 
                 // Redis CACHING
-                if (placesCache != null) {
-                    placesCache.put(placeDetails.placeId, fullLocationDetails);
-                    log.info("Uploaded place details with place Id: {} to Redis cache: {}",
-                            placeDetails.placeId,
-                            fullLocationDetails.getName() + " " + fullLocationDetails.getWebsite());
-                }
+//                if (placesCache != null) {
+//                    placesCache.put(placeDetails.placeId, fullLocationDetails);
+//                    log.info("Uploaded place details with place Id: {} to Redis cache: {}",
+//                            placeDetails.placeId,
+//                            fullLocationDetails.getName() + " " + fullLocationDetails.getWebsite());
+//                }
 
                 return fullLocationDetails;
             } catch (Exception e) {
