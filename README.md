@@ -1,6 +1,6 @@
 # Wanderverse Backend
 
-A robust and scalable backend for the Wanderverse travel app, featuring a social-sharing platform, an AI-driven trip planner, and a personalized recommendation engine. Developed by Choy Min Han (Team Quacking Bakchoi)
+A robust and scalable backend for the Wanderverse travel app, featuring a social-sharing platform, an AI-driven trip planner, and a personalised recommendation engine, hosted in AWS Cloud. Developed by Choy Min Han (Team Quacking Bakchoi)
 
 ---
 
@@ -31,14 +31,16 @@ This backend was built incrementally across three milestones, and includes the f
     * **AWS S3**: For storing and retrieving user-uploaded photos.
     * **AWS RDS**: Hosts the PostgreSQL relational database.
     * **AWS EC2**: Serves the application, configured behind an Application Load Balancer for high availability.
+    * **AWS CloudFront**: Content Delivery Network for global region support.
+    * **AmazonMQ**: Messaging Queue for better decoupling of the server code.
 
 #### Advanced Services
-* **AI-Powered Trip Planner**: Utilizes the Google Gemini 2.0 Flash Lite model to act as an agentic AI for creating personalized and detailed travel itineraries. The AI uses **automatic tool calling** to retrieve real-time data from various Google APIs (e.g., Maps, Place Details) to enrich its output.
-* **Personalized Recommendation Engine**: A sophisticated system that uses **Google Gemini Text Embedding** to generate semantic vectors of user preferences and posts. These vectors are stored in the **Qdrant vector database** to provide highly relevant, personalized content recommendations.
+* **AI-Powered Trip Planner**: Utilises the Google Gemini 2.0 Flash Lite model to act as an agentic AI for creating personalised and detailed travel itineraries. The AI uses **automatic tool calling** to retrieve real-time data from various Google APIs (e.g., Maps, Place Details) to enrich its output.
+* **Personalised Recommendation Engine**: A sophisticated system that uses **Google Gemini Text Embedding** to generate semantic vectors of user preferences and posts. These vectors are stored in the **Qdrant vector database** to provide highly relevant, personalized content recommendations.
 * **Post Search Engine**: Implements a semantic search engine using Google Gemini Text Embedding and Qdrant, allowing users to find posts and destinations with natural language queries rather than exact keywords.
 * **Asynchronous Tasks**: Integrated with a messaging queue (**RabbitMQ/AmazonMQ**) to decouple synchronous operations from tasks like sending notifications or processing recommendation updates, ensuring a responsive user experience.
-* **Caching**: Uses **Redis** (locally) and **AWS ElastiCache** (in production) to cache frequently accessed data, reducing database load and latency.
-* **Security**: Includes implemented rate limiting and DDoS protection measures to safeguard the API from malicious activity.
+* **Caching**: Uses **Redis** to cache frequently accessed data, reducing database load and latency.
+* **Messaging Queue Broker**: Utilises RabbitMQ to build efficient and reliable data pipelines for messaging.
 
 ---
 
