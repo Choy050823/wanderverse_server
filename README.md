@@ -1,12 +1,6 @@
 # Wanderverse Backend
 
-<p align="center">
-  <a href="https://wanderverse-travel.netlify.app/">
-    <img src="https://placehold.co/150x150/203040/FFFFFF?text=Wanderverse" alt="Wanderverse Logo">
-  </a>
-</p>
-
-A robust and scalable backend for the Wanderverse travel app, featuring a social-sharing platform, an AI-driven trip planner, and a personalized recommendation engine. Developed by Team Quacking Bakchoi.
+A robust and scalable backend for the Wanderverse travel app, featuring a social-sharing platform, an AI-driven trip planner, and a personalized recommendation engine. Developed by Choy Min Han (Team Quacking Bakchoi)
 
 ---
 
@@ -66,17 +60,3 @@ This backend was built incrementally across three milestones, and includes the f
 The backend is built as a set of interconnected microservices, ensuring modularity and scalability. Requests are routed through an AWS Application Load Balancer to multiple EC2 instances running the Spring Boot application. The application interacts with a PostgreSQL database on AWS RDS and stores media files in an S3 bucket. Asynchronous tasks are handled by a messaging queue, while a Redis cache improves the performance of frequent data lookups. The Qdrant vector database is integrated to power the advanced search and recommendation features.
 
 ---
-
-### Getting Started
-
-_Instructions on how to clone the repository, set up the development environment, configure AWS credentials, and run the backend locally would go here. This would typically include steps for setting up the PostgreSQL and Qdrant databases, and configuring environment variables for AWS keys and other secrets._
-
-**Note**: When testing the application, please avoid using the NUS Wifi as the API endpoints may be blocked by the firewall.
-
----
-
-### Team
-
-**Team Quacking Bakchoi**
-* Kuek Yi Hong
-* Choy Min Han
